@@ -1,4 +1,4 @@
-NAME = skeleton
+NAME = ft_nm
 
 # Compiler and linker
 CC = clang
