@@ -4,6 +4,7 @@
 
 #include <elf.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
 
@@ -28,6 +29,12 @@ typedef struct	s_elf_map_32
 	const char			*str;
 	const char			*shstr;
 }				t_elf_map_32;
+
+typedef struct	s_elf_sym_64
+{
+	const Elf64_Sym	*symbol;
+	const char		*name;
+}				t_elf_sym_64;
 
 
 int	elf_identify(const void *data, unsigned long size)
@@ -105,30 +112,134 @@ int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 	return (0);
 }
 
-int	elf_dump_syms_64(const t_elf_map_64 *map)
+/*
+typedef struct	s_elf_sym_type_64
 {
+	Elf64_Word	type;
+	char		identifier;
+}				t_elf_sym_type_64;
+
+// TODO: Upcase globalq
+t_elf_sym_type_64	g_sym_types_64[] = {{STT_NOTYPE, 'a'}, {STT_OBJECT, 'r'}, {STT_FILE, 'a'}};
+ */
+
+t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
+{
+	t_list			*list_elem;
+	t_elf_sym_64	*new_sym;
+
+	list_elem = malloc(sizeof(*list_elem) + sizeof(*new_sym));
+	if (!list_elem)
+		return (NULL);
+	new_sym = (t_elf_sym_64*)(list_elem + 1);
+	new_sym->symbol = symbol;
+	new_sym->name = map->str + symbol->st_name;
+	list_elem->content = new_sym;
+	list_elem->next = NULL;
+	return (list_elem);
+}
+
+t_list	*elf_load_syms_64(const t_elf_map_64 *map)
+{
+	t_list			*symbols;
+	t_list			*elem;
+	Elf64_Sym		*sym;
+	Elf64_Xword	sym_count;
 	Elf64_Half	i;
 	Elf64_Xword	j;
-	Elf64_Sym	*sym;
-	Elf64_Xword	sym_count;
 
+	symbols = NULL;
 	i = 0;
 	while (i < map->eh->e_shnum)
 	{
+		printf("%u %s\n", map->sh[i].sh_type,
+			elf_shstr_64(map, map->sh[i].sh_name));
 		if (map->sh[i].sh_type == SHT_SYMTAB)
 		{
-			sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
 			sym = (Elf64_Sym*)((unsigned char*)map->eh + map->sh[i].sh_offset);
-			printf("Dumping symbols from '%s'[%lu]:\n", elf_shstr_64(map, map->sh[i].sh_name), sym_count);
+			sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
+			printf("Loading symbols from '%s'[%lu]...\n",
+				elf_shstr_64(map, map->sh[i].sh_name), sym_count);
 			j = 0;
 			while (j < sym_count)
 			{
-				printf("%04lx . %s\n", sym[j].st_value, map->str + sym[j].st_name);
+				if (*(map->str + sym[j].st_name))
+				{
+					if (!(elem = elf_load_sym_64(map, sym + j)))
+					{
+						ft_lstclear(&symbols, NULL);
+						return (NULL);
+					}
+					printf("Loading %s...\n", map->str + sym[j].st_name);
+					ft_lstadd_front(&symbols, elem);
+				}
 				j++;
 			}
 		}
 		i++;
 	}
+	return (symbols);
+}
+
+int	elf_sym_cmp_64(void *a, void *b)
+{
+	const t_elf_sym_64 *const	sym_a = (t_elf_sym_64*)a;
+	const t_elf_sym_64 *const	sym_b = (t_elf_sym_64*)b;
+	int							diff;
+	int							pref;
+
+	const char	*name_a = sym_a->name;
+	const char	*name_b = sym_b->name;
+
+	if (*name_a == '_')
+	{
+		pref = 1;
+		while (*name_a == '_')
+			name_a++;
+	}
+	if (*name_b == '_')
+	{
+		pref = -1;
+		while (*name_b == '_')
+			name_b++;
+	}
+	while (*name_a && ft_tolower(*name_a) == ft_tolower(*name_b))
+	{
+		name_a++;
+		name_b++;
+	}
+	diff = ft_tolower(*name_b) - ft_tolower(*name_a);
+	if (!diff)
+		return (pref);
+	return (diff);
+}
+
+void	elf_print_sym_64(void *data)
+{
+	const t_elf_sym_64 *const	sym = (t_elf_sym_64*)data;
+
+	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
+	{
+		printf("%016lx %02u:%02u %s\n",
+			sym->symbol->st_value,
+			ELF32_ST_BIND(sym->symbol->st_info),
+			ELF32_ST_TYPE(sym->symbol->st_info),
+			sym->name);
+	}
+
+}
+
+#define ELF_SYM_TYPES "aaa"
+int	elf_dump_syms_64(const t_elf_map_64 *map)
+{
+	t_list	*symbols;
+
+	symbols = elf_load_syms_64(map);
+	if (!symbols)
+		return (1);
+	ft_lstsort(&symbols, &elf_sym_cmp_64);
+	ft_lstiter(symbols, &elf_print_sym_64);
+	ft_lstclear(&symbols, NULL);
 	return (0);
 }
 
