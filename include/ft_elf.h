@@ -1,5 +1,7 @@
-#ifndef ELF_H
-# define ELF_H
+#ifndef FT_ELF_H
+# define FT_ELF_H
+
+# define ELF_EBADFMT 1
 
 # include <stdint.h>
 
@@ -125,7 +127,6 @@ struct __attribute__((__packed__)) s_elf_64_ph
 	uint64_t	p_filesz;
 	// segment size in bytes in memory
 	uint64_t	p_memsz;
-	// TODO: flags 32
 	// 0 and 1 specify no alignment. Otherwise a positive int power of 2,
 	// with p_vaddr == p_offset % p_align
 	uint64_t	p_align;
@@ -135,7 +136,7 @@ struct __attribute__((__packed__)) s_elf_64_ph
 
 struct __attribute__((__packed__)) s_elf_32_sh
 {
-	// offset of the string representing the name in the .shstrtab secion
+	// offset of the string representing the name in the .shstrtab section
 	uint32_t	sh_name;
 	// type of the section
 	uint32_t	sh_type;

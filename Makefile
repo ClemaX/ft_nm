@@ -13,7 +13,7 @@ OBJDIR = obj
 BINDIR = .
 
 # Library dependencies
-LIBS = $(addprefix $(LIBDIR), )
+LIBS = $(addprefix $(LIBDIR)/, libft/libft.a)
 
 LIBDIRS = $(dir $(LIBS))
 LIBINCS = $(addsuffix $(INCDIR), $(LIBDIRS))
@@ -23,13 +23,15 @@ LIBARS = $(notdir $(LIBS))
 INCS = $(LIBINCS) $(INCDIR)
 SRCS = $(addprefix $(SRCDIR)/,\
 	main.c\
+	elf_dump.c\
+	file_map.c\
 )
 
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 DEPS = $(OBJS:.o=.d)
 
 # Flags
-CFLAGS = -Wall -Wextra -Werror -I$(INCDIR)
+CFLAGS = -Wall -Wextra -Werror $(INCS:%=-I%)
 DFLAGS = -MT $@ -MMD -MP -MF $(OBJDIR)/$*.d
 LDFLAGS = $(LIBDIRS:%=-L%)
 LDLIBS = $(LIBARS:lib%.a=-l%)
@@ -60,7 +62,7 @@ $(DEPS): $(OBJDIR)/%.d:
 include $(wildcard $(DEPS))
 
 # Binaries
-$(BINDIR)/$(NAME): $(OBJS) $(LIBS) | $(BINDIR)
+$(BINDIR)/$(NAME): $(OBJS) | $(LIBS) $(BINDIR)
 	@echo "LD $@"
 	$(COMPILE.o) $^ -o $@ $(LDLIBS)
 
