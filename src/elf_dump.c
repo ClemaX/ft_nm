@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 
 #include <libft.h>
 

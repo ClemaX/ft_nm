@@ -1,4 +1,4 @@
-#include <sys/fcntl.h>
+#include <fcntl.h>
 
 #include <elf_dump.h>
 
