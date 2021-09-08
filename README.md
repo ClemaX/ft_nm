@@ -27,4 +27,14 @@ program:
 ## Memory Mapped IO
 TODO
 
+## Building
+
+This program requires a platform supporting the ELF.
+To build and run the project on another platform you can use the included Dockerfile.
+
+```sh
+docker build -t ft_nm .
+docker run --rm ft_nm ./ft_nm [ELF FILE]
+```
+
 [elfDiagram]: https://upload.wikimedia.org/wikipedia/commons/e/e4/ELF_Executable_and_Linkable_Format_diagram_by_Ange_Albertini.png

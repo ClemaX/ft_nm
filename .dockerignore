@@ -1,0 +1,7 @@
+lib/libft/obj/
+lib/libft/libft.a
+obj/
+ft_nm
+Dockerfile
+.dockerignore
+
