@@ -31,7 +31,7 @@
 #ifndef _SYS_ELFTYPES_H
 #define	_SYS_ELFTYPES_H
 
-#pragma ident	"@(#)elftypes.h	1.24	05/06/08 SMI"	/* SVr4.0 1.1	*/
+//#pragma ident	"@(#)elftypes.h	1.24	05/06/08 SMI"	/* SVr4.0 1.1	*/
 
 #if !defined(__APPLE__)
 #include <sys/feature_tests.h>

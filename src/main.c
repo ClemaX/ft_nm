@@ -1,8 +1,8 @@
+#include <stdio.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include <elf_dump.h>
-
-#include <file_map.h>
 
 int	main(int ac, char **av)
 {
@@ -22,7 +22,14 @@ int	main(int ac, char **av)
 		else
 		{
 			err = elf_dump(fd);
-			close(fd);
+			if (err != 0)
+				perror("elf_dump");
+			if (close(fd) != 0)
+			{
+				perror("close");
+				if (err == 0)
+					err = 1;
+			}
 		}
 		i++;
 	}

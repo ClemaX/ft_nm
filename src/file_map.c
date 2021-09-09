@@ -1,4 +1,11 @@
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <file_map.h>
+
+// TODO: ft_perror
 
 off_t	file_map(int fd, void**addr)
 {

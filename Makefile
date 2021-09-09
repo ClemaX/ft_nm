@@ -30,6 +30,9 @@ INCS = $(LIBINCS) $(INCDIR)
 SRCS = $(addprefix $(SRCDIR)/,\
 	main.c\
 	elf_dump.c\
+	elf_map.c\
+	elf_shstr.c\
+	elf_sym.c\
 	file_map.c\
 )
 
@@ -37,9 +40,9 @@ OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 DEPS = $(OBJS:.o=.d)
 
 # Flags
-CFLAGS = -Wall -Wextra -Werror $(INCS:%=-I%)
+CFLAGS = -Wall -Wextra -Werror $(INCS:%=-I%) -fsanitize=address -g3
 DFLAGS = -MT $@ -MMD -MP -MF $(OBJDIR)/$*.d
-LDFLAGS = $(LIBDIRS:%=-L%)
+LDFLAGS = $(LIBDIRS:%=-L%) -fsanitize=address -g3
 LDLIBS = $(LIBARS:lib%.a=-l%)
 
 # Compiling commands

@@ -30,7 +30,7 @@
 #ifndef _SYS_ELF_H
 #define	_SYS_ELF_H
 
-#pragma ident	"@(#)elf.h	1.70	08/05/13 SMI"
+//#pragma ident	"@(#)elf.h	1.70	08/05/13 SMI"
 
 #if !defined(__APPLE__)
 #include <sys/elftypes.h>
@@ -501,11 +501,7 @@ typedef struct {
 
 #if defined(_LP64) || defined(_LONGLONG_TYPE)
 typedef struct {
-#if !defined(__APPLE__)
 	Elf64_Word	st_name;
-#else
-	Elf64_Sxword	st_name;
-#endif /* __APPLE__ */
 	unsigned char	st_info;	/* bind, type: ELF_64_ST_... */
 	unsigned char	st_other;
 	Elf64_Half	st_shndx;	/* SHN_... */
