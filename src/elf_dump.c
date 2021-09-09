@@ -2,8 +2,6 @@
 #include <elf_dump.h>
 #include <file_map.h>
 
-#include <elf.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>

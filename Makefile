@@ -19,6 +19,12 @@ LIBDIRS = $(dir $(LIBS))
 LIBINCS = $(addsuffix $(INCDIR), $(LIBDIRS))
 LIBARS = $(notdir $(LIBS))
 
+UNAME = $(shell uname -s)
+
+ifeq ($(UNAME), Darwin)
+	LIBINCS += $(LIBDIR)/apple/elf/include
+endif
+
 # Sources
 INCS = $(LIBINCS) $(INCDIR)
 SRCS = $(addprefix $(SRCDIR)/,\
