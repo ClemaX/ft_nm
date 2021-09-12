@@ -25,7 +25,7 @@ int	main(int ac, char **av)
 		else
 		{
 			err = elf_dump(fd);
-			if (err != 0)
+			if (err == -1)
 				perror("elf_dump");
 			if (close(fd) != 0)
 			{

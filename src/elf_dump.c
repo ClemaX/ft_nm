@@ -54,8 +54,13 @@ static int		elf_dump_64(const void *data, unsigned long size)
 	int				err;
 
 	err = elf_map_64(&map, data, size);
-	if (!err)
-		err = elf_dump_syms_64(&map);
+	if (err == 0)
+	{
+		if (map.sym_count == 0)
+			ft_printf("no symbols\n");
+		else
+			err = elf_dump_syms_64(&map);
+	}
 	return (err);
 }
 
@@ -79,7 +84,10 @@ int				elf_dump(int fd)
 	else if (elf_class == ELFCLASS64)
 		err = elf_dump_64(data, (unsigned long)size);
 	else
+	{
 		err = ELF_EBADFMT;
+		ft_dprintf(2, "Unknown file class!\n");
+	}
 	if (file_unmap(&data, size) && !err)
 		err = -1;
 	return (err);

@@ -27,7 +27,6 @@ char	elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
 	unsigned char	i;
 	char			identifier;
 
-	//ft_printf("Identifying '%s'...", name);
 	i = 0;
 	while (i != sizeof(hints) / sizeof(*hints)
 	&& elf_map_shcmp(hints + i, name, type, flags) != 0)
@@ -99,7 +98,10 @@ int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 			}
 		}
 		else
+		{
 			ret = -1;
+			ft_dprintf(2, "symid[%u]: allocation failed\n", map->eh->e_shnum);
+		}
 	}
 	else
 		map->shid = NULL;
@@ -109,16 +111,18 @@ int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 {
 	map->eh = (Elf64_Ehdr*)data;
-/*
-	ft_printf("Program header table offset: %lu\n", map->eh->e_phoff);
-	ft_printf("Program header entry count: %hu\n", map->eh->e_phnum);
-	ft_printf("Section header table offset: %lu\n", map->eh->e_shoff);
-	ft_printf("Section header string table index: %hu\n", map->eh->e_shstrndx);
-*/
+
 	if (size < sizeof(Elf64_Ehdr)
 	|| size < map->eh->e_phoff + map->eh->e_phentsize * map->eh->e_phnum
 	|| size < map->eh->e_shoff + map->eh->e_shentsize * map->eh->e_shnum)
+	{
+		ft_dprintf(2, "Program header table offset: "PRIuOFF_T"\n", map->eh->e_phoff);
+		ft_dprintf(2, "Program header entry count: %hu\n", map->eh->e_phnum);
+		ft_dprintf(2, "Section header table offset: "PRIuOFF_T"\n", map->eh->e_shoff);
+		ft_dprintf(2, "Section header string table index: %hu\n", map->eh->e_shstrndx);
+
 		return (ELF_EBADFMT);
+	}
 	map->ph = (Elf64_Phdr *)((unsigned char*)data + map->eh->e_phoff);
 	map->sh = (Elf64_Shdr *)((unsigned char*)data + map->eh->e_shoff);
 	if (map->eh->e_shstrndx != SHN_UNDEF)
