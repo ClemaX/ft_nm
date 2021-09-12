@@ -69,7 +69,7 @@ int				elf_dump(int fd)
 	if (size == (off_t)-1)
 		return ((int)size);
 
-	ft_printf("Data size: "PF_OFF_T" bytes\n", size);
+	ft_printf("Data size: "PRIuOFF_T" bytes\n", size);
 
 	elf_class = elf_ident(data, (unsigned long)size);
 	ft_printf("File class: %d\n", elf_class);
