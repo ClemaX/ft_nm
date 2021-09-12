@@ -1,7 +1,10 @@
-lib/libft/obj/
+lib/libft/objs/
 lib/libft/libft.a
+lib/gnu
 obj/
 ft_nm
 Dockerfile
 .dockerignore
-
+README.md
+.gitignore
+.git/
