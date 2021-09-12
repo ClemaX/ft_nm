@@ -38,6 +38,10 @@ static int		elf_dump_syms_64(const t_elf_map_64 *map)
 	symbols = elf_load_syms_64(map);
 	if (!symbols)
 		return (1);
+
+	// TODO: Handle comparison by address ('-n/-v/--numeric-sort')
+	// TODO: Handle no sort ('-p/--no-sort')
+	// TODO: Handle reverse sort ('-r/--reverse-sort')
 	ft_lstsort(&symbols, &elf_sym_cmp_64);
 	ft_lstiter(symbols, &elf_print_sym_64);
 	ft_lstclear(&symbols, NULL);

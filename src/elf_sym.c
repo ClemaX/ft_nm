@@ -84,6 +84,7 @@ t_list	*elf_load_syms_64(const t_elf_map_64 *map)
 	return (symbols);
 }
 
+// TODO: Fix underscore count comparison
 int	elf_sym_cmp_64(void *a, void *b)
 {
 	const t_elf_sym_64 *const	sym_a = (t_elf_sym_64*)a;
@@ -117,9 +118,24 @@ int	elf_sym_cmp_64(void *a, void *b)
 	return (diff);
 }
 
+/*
+	TODO:
+
+	If a symbol has version information associated with it,
+	then the version information is displayed as well. If the versioned
+	symbol is undefined or hidden from linker, the version string is
+	displayed as a suffix to the symbol name, preceded by an @ character.
+	For example ‘foo@VER_1’.
+
+	If the version is the default version to be used when resolving unversioned
+	references to the symbol, then it is displayed as a suffix preceded by two
+	@ characters.
+	For example ‘foo@@VER_2’.
+*/
 void	elf_print_sym_64(void *data)
 {
 	const t_elf_sym_64 *const	sym = (t_elf_sym_64*)data;
+
 
 	// TODO: Toggle this predicate using '-A/-o/--print-file-name' flag
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)

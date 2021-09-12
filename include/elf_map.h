@@ -12,6 +12,8 @@
 # define ELF_SHID_COMMON 'c'
 # define ELF_SHID_BSS 'b'
 # define ELF_SHID_DATA 'd'
+# define ELF_SHID_READONLY 'r'
+# define ELF_SHID_SDATA 's'
 # define ELF_SHID_TEXT 't'
 # define ELF_SHID_STAB '-'
 
@@ -43,7 +45,7 @@ typedef struct	s_elf_section_hint
 	// Type is matched using == operation
 	unsigned int	type;
 	// Flags are matched using &                operation
-	unsigned int	flags;
+	Elf64_Xword		flags;
 	// This pointer can be null to match any section
 	const char		*name;
 	// Identifier to set
