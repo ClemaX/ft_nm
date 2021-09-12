@@ -13,10 +13,13 @@ int		elf_map_shcmp(const t_elf_section_hint *hint, const char *name,
 char	elf_map_shid(const char *name, unsigned int type, unsigned int flags)
 {
 	static const t_elf_section_hint	hints[] = {
-		{SHT_STRTAB, SHF_ALLOC, ".strtab", ELF_SHID_STRTAB},
-		{SHT_SYMTAB, SHF_ALLOC, ".symtab", ELF_SHID_SYMTAB},
 		{SHT_NOBITS, SHF_ALLOC | SHF_WRITE, ".bss", ELF_SHID_BSS},
 		{SHT_PROGBITS, SHF_ALLOC | SHF_WRITE, ".data", ELF_SHID_DATA},
+		{SHT_STRTAB, SHF_ALLOC, ".strtab", ELF_SHID_STRTAB},
+		{SHT_SYMTAB, SHF_ALLOC, ".symtab", ELF_SHID_SYMTAB},
+		{SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR, ".text", ELF_SHID_TEXT},
+		{SHT_PROGBITS, 0, ".stab", ELF_SHID_STAB},
+		// TODO: Add .rodata -> 'r'
 	};
 	unsigned char	i;
 	char			identifier;
@@ -40,7 +43,7 @@ int	elf_map_section(const void **dest, const void *data, const char *name)
 
 	if (*dest != NULL)
 	{
-		ft_printf("Multiple '%s' sections!\n", name);
+		ft_dprintf(2, "Multiple '%s' sections!\n", name);
 		ret = ELF_EBADFMT;
 	}
 	else

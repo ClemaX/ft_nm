@@ -5,6 +5,14 @@
 
 # include <elf_map.h>
 
+# define ELF_SYMID_UNKNOWN ELF_SHID_UNKNOWN
+// Undefined symbol
+# define ELF_SYMID_UNDEFINED 'U'
+// Unique global symbol
+# define ELF_SYMID_UNIQUE 'u'
+// Weakly bound symbol
+# define ELF_SYMID_WEAK 'w'
+
 typedef struct	s_elf_sym_64
 {
 	const Elf64_Sym	*symbol;

@@ -4,11 +4,11 @@
 
 char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	char	identifier = '?';
+	char	identifier = ELF_SYMID_UNKNOWN;
 
 	(void) map;
 	if (ELF64_ST_BIND(symbol->st_info) & STB_WEAK)
-		identifier = 'w';
+		identifier = ELF_SYMID_WEAK;
 
 	return identifier;
 }
@@ -20,10 +20,12 @@ char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 
 	(void) map;
 	if (symbol->st_shndx == SHN_ABS)
-		identifier = 'a';
+		identifier = ELF_SHID_ABS;
 	else if (symbol->st_shndx == SHN_COMMON)
-		identifier = 'c';
-	// TODO: Handle bss data and text sections
+		identifier = ELF_SHID_COMMON;
+	else
+		identifier = map->shid[symbol->st_shndx];
+	// TODO: Handle overflow by using sh_count!
 	return identifier;
 }
 
@@ -33,14 +35,10 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 
 	identifier = elf_sym_locate(map, symbol);
 
-	if (symbol->st_shndx == SHN_ABS)
-		identifier = 'A';
-	else if (map->sh[symbol->st_shndx].sh_type == SHT_NOBITS && map->sh[symbol->st_shndx].sh_flags == (SHF_ALLOC | SHF_WRITE) && map->sh[symbol->st_shndx].sh_info)
-		identifier = 'B'; // TODO: Get bind and set local bind
-
-	if (ft_isalpha(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
+	if (symbol->st_value == 0)
+		identifier = ELF_SYMID_UNDEFINED;
+	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
-
 	return identifier;
 }
 
@@ -55,7 +53,7 @@ t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	new_sym = (t_elf_sym_64*)(list_elem + 1);
 	new_sym->symbol = symbol;
 	new_sym->name = map->str + symbol->st_name;
-	//new_sym->identifier = elf_sym_type_64(map, symbol);
+	new_sym->identifier = elf_sym_type_64(map, symbol);
 	list_elem->content = new_sym;
 	list_elem->next = NULL;
 	return (list_elem);
@@ -123,13 +121,15 @@ void	elf_print_sym_64(void *data)
 {
 	const t_elf_sym_64 *const	sym = (t_elf_sym_64*)data;
 
+	// TODO: Toggle this predicate using '-A/-o/--print-file-name' flag
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
 	{
-		// TODO: Get the sections's identifier from shstndx
-		ft_printf("%016lx %02u:%02u %s\n",
+		if (sym->identifier == ELF_SYMID_UNDEFINED)
+			ft_printf("%16s %c %s\n", "", sym->identifier, sym->name);
+		else
+			ft_printf("%016lx %c %s\n",
 			sym->symbol->st_value,
-			ELF32_ST_BIND(sym->symbol->st_info),
-			ELF32_ST_TYPE(sym->symbol->st_info),
+			sym->identifier,
 			sym->name);
 	}
 

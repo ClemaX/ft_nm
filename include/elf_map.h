@@ -12,6 +12,8 @@
 # define ELF_SHID_COMMON 'c'
 # define ELF_SHID_BSS 'b'
 # define ELF_SHID_DATA 'd'
+# define ELF_SHID_TEXT 't'
+# define ELF_SHID_STAB '-'
 
 typedef struct	s_elf_map_64
 {
