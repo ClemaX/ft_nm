@@ -21,7 +21,7 @@ char	elf_map_shid(const char *name, unsigned int type, unsigned int flags)
 	unsigned char	i;
 	char			identifier;
 
-	ft_printf("Identifying '%s'...", name);
+	//ft_printf("Identifying '%s'...", name);
 	i = 0;
 	while (i != sizeof(hints) / sizeof(*hints)
 	&& elf_map_shcmp(hints + i, name, type, flags) != 0)
@@ -30,7 +30,7 @@ char	elf_map_shid(const char *name, unsigned int type, unsigned int flags)
 		identifier = ELF_SHID_UNKNOWN;
 	else
 		identifier = hints[i].identifier;
-	ft_printf(" %c\n", identifier);
+	//ft_printf(" %c\n", identifier);
 	return identifier;
 }
 

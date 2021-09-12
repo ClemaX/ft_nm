@@ -78,7 +78,7 @@ t_list	*elf_load_syms_64(const t_elf_map_64 *map)
 				ft_lstclear(&symbols, NULL);
 				return (NULL);
 			}
-			ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
+			//ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
 			ft_lstadd_front(&symbols, elem);
 		}
 		i++;
