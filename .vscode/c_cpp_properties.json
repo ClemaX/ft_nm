@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/lib/libft/include",
-                "${workspaceRoot}/lib/apple/elf/include"
+                "${workspaceRoot}/lib/gnu/elf/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

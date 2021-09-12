@@ -22,7 +22,7 @@ LIBARS = $(notdir $(LIBS))
 UNAME = $(shell uname -s)
 
 ifeq ($(UNAME), Darwin)
-	LIBINCS += $(LIBDIR)/apple/elf/include
+	LIBINCS += $(LIBDIR)/gnu/elf/include
 endif
 
 # Sources
