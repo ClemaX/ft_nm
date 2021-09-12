@@ -4,45 +4,44 @@
 
 char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	char	type = '?';
+	char	identifier = '?';
 
 	(void) map;
 	if (ELF64_ST_BIND(symbol->st_info) & STB_WEAK)
-		type = 'w';
+		identifier = 'w';
 
-	return type;
+	return identifier;
 }
 
 
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	char	type = '?';
+	char	identifier = '?';
 
 	(void) map;
 	if (symbol->st_shndx == SHN_ABS)
-		type = 'a';
+		identifier = 'a';
 	else if (symbol->st_shndx == SHN_COMMON)
-		type = 'c';
+		identifier = 'c';
 	// TODO: Handle bss data and text sections
-	return type;
+	return identifier;
 }
 
 char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	char	type;
+	char	identifier;
 
-
-	type = elf_sym_locate(map, symbol);
+	identifier = elf_sym_locate(map, symbol);
 
 	if (symbol->st_shndx == SHN_ABS)
-		type = 'A';
+		identifier = 'A';
 	else if (map->sh[symbol->st_shndx].sh_type == SHT_NOBITS && map->sh[symbol->st_shndx].sh_flags == (SHF_ALLOC | SHF_WRITE) && map->sh[symbol->st_shndx].sh_info)
-		type = 'B'; // TODO: Get bind and set local bind
+		identifier = 'B'; // TODO: Get bind and set local bind
 
-	if (ft_isalpha(type) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
-		type += 'A' - 'a';
+	if (ft_isalpha(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
+		identifier += 'A' - 'a';
 
-	return type;
+	return identifier;
 }
 
 t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
@@ -56,7 +55,7 @@ t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	new_sym = (t_elf_sym_64*)(list_elem + 1);
 	new_sym->symbol = symbol;
 	new_sym->name = map->str + symbol->st_name;
-	//new_sym->type = elf_sym_type_64(map, symbol);
+	//new_sym->identifier = elf_sym_type_64(map, symbol);
 	list_elem->content = new_sym;
 	list_elem->next = NULL;
 	return (list_elem);
@@ -143,7 +142,7 @@ void	elf_print_sym_64(void *data)
 
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
 	{
-		// TODO: Get the sections's type from shstndx
+		// TODO: Get the sections's identifier from shstndx
 		ft_printf("%016lx %02u:%02u %s\n",
 			sym->symbol->st_value,
 			ELF32_ST_BIND(sym->symbol->st_info),
