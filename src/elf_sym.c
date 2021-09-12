@@ -86,38 +86,19 @@ t_list	*elf_load_syms_64(const t_elf_map_64 *map)
 	return (symbols);
 }
 
-// TODO: Fix underscore count comparison
 int	elf_sym_cmp_64(void *a, void *b)
 {
 	const t_elf_sym_64 *const	sym_a = (t_elf_sym_64*)a;
 	const t_elf_sym_64 *const	sym_b = (t_elf_sym_64*)b;
-	int							diff;
-	int							pref;
-
 	const char	*name_a = sym_a->name;
 	const char	*name_b = sym_b->name;
 
-	if (*name_a == '_')
-	{
-		pref = 1;
-		while (*name_a == '_')
-			name_a++;
-	}
-	if (*name_b == '_')
-	{
-		pref = -1;
-		while (*name_b == '_')
-			name_b++;
-	}
-	while (*name_a && ft_tolower(*name_a) == ft_tolower(*name_b))
+	while (*name_a != '\0' && *name_a == *name_b)
 	{
 		name_a++;
 		name_b++;
 	}
-	diff = ft_tolower(*name_b) - ft_tolower(*name_a);
-	if (!diff)
-		return (pref);
-	return (diff);
+	return (*name_b - *name_a);
 }
 
 /*
