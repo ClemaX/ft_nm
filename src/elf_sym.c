@@ -65,38 +65,21 @@ t_list	*elf_load_syms_64(const t_elf_map_64 *map)
 {
 	t_list			*symbols;
 	t_list			*elem;
-	Elf64_Sym		*sym;
-	Elf64_Xword		sym_count;
 	Elf64_Half		i;
-	Elf64_Xword		j;
 
 	symbols = NULL;
 	i = 0;
-	while (i < map->eh->e_shnum)
+	while (i < map->sym_count)
 	{
-		ft_printf("Found sh %u:%lu %s...\n", map->sh[i].sh_type, map->sh[i].sh_flags,
-			elf_shstr_64(map, map->sh[i].sh_name));
-		if (map->sh[i].sh_type == SHT_SYMTAB)
+		if (*(map->str + map->sym[i].st_name))
 		{
-			sym = (Elf64_Sym*)((unsigned char*)map->eh + map->sh[i].sh_offset);
-			sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
-			ft_printf("Loading symbols from '%s'[%lu]...\n",
-				elf_shstr_64(map, map->sh[i].sh_name), sym_count);
-			j = 0;
-			while (j < sym_count)
+			if (!(elem = elf_load_sym_64(map, map->sym + i)))
 			{
-				if (*(map->str + sym[j].st_name))
-				{
-					if (!(elem = elf_load_sym_64(map, sym + j)))
-					{
-						ft_lstclear(&symbols, NULL);
-						return (NULL);
-					}
-					ft_printf("Loading %d->%s...\n", sym[j].st_shndx, map->str + sym[j].st_name);
-					ft_lstadd_front(&symbols, elem);
-				}
-				j++;
+				ft_lstclear(&symbols, NULL);
+				return (NULL);
 			}
+			ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
+			ft_lstadd_front(&symbols, elem);
 		}
 		i++;
 	}

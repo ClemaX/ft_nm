@@ -18,9 +18,11 @@ typedef struct	s_elf_map_64
 	const Elf64_Ehdr	*eh;
 	const Elf64_Phdr	*ph;
 	const Elf64_Shdr	*sh;
+	char				*shid;
 	const char			*str;
 	const char			*shstr;
-	char				*shid;
+	const Elf64_Sym		*sym;
+	Elf64_Xword			sym_count;
 }				t_elf_map_64;
 
 typedef struct	s_elf_map_32

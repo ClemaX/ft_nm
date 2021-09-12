@@ -34,7 +34,7 @@ char	elf_map_shid(const char *name, unsigned int type, unsigned int flags)
 	return identifier;
 }
 
-int	elf_map_section(const char **dest, const void *data, const char *name)
+int	elf_map_section(const void **dest, const void *data, const char *name)
 {
 	int	ret;
 
@@ -63,7 +63,7 @@ typedef struct	s_elf_map_shid
 	};
 */
 
-int	elf_map_shids_64(t_elf_map_64 *map, const void *data)
+int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 {
 	int		i;
 	int		ret;
@@ -80,8 +80,15 @@ int	elf_map_shids_64(t_elf_map_64 *map, const void *data)
 				map->shid[i] = elf_map_shid(map->shstr + map->sh[i].sh_name,
 					map->sh[i].sh_type, map->sh[i].sh_flags);
 				if (map->shid[i] == ELF_SHID_STRTAB)
-					ret = elf_map_section(&map->str, data + map->sh[i].sh_offset,
+					ret = elf_map_section((const void**)&map->str, data + map->sh[i].sh_offset,
 						map->shstr + map->sh[i].sh_name);
+				else if (map->shid[i] == ELF_SHID_SYMTAB)
+				{
+					ret = elf_map_section((const void**)&map->sym, data + map->sh[i].sh_offset,
+						map->shstr + map->sh[i].sh_name);
+					if (ret == 0)
+						map->sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
+				}
 				i++;
 			}
 		}
@@ -113,5 +120,7 @@ int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 	else
 		map->shstr = (const char *)NULL;
 	map->str = NULL;
-	return (elf_map_shids_64(map, data));
+	map->sym = NULL;
+	map->sym_count = 0;
+	return (elf_map_sections_64(map, data));
 }
