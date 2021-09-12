@@ -2,6 +2,8 @@
 
 #include <elf_sym.h>
 
+#include <inttypes.h>
+
 char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	char	identifier = ELF_SYMID_UNKNOWN;
@@ -143,7 +145,7 @@ void	elf_print_sym_64(void *data)
 		if (sym->identifier == ELF_SYMID_UNDEFINED)
 			ft_printf("%16s %c %s\n", "", sym->identifier, sym->name);
 		else
-			ft_printf("%016llx %c %s\n",
+			ft_printf("%016"PRIx64" %c %s\n",
 			sym->symbol->st_value,
 			sym->identifier,
 			sym->name);
