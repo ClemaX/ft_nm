@@ -34,17 +34,19 @@ static int		elf_dump_32(void const *data, unsigned long size)
 static int		elf_dump_syms_64(const t_elf_map_64 *map)
 {
 	t_list	*symbols;
+	int		ret;
 
-	symbols = elf_load_syms_64(map);
-	if (!symbols)
-		return (1);
+	ret = elf_load_syms_64(&symbols, map);
 
-	// TODO: Handle comparison by address ('-n/-v/--numeric-sort')
-	// TODO: Handle no sort ('-p/--no-sort')
-	// TODO: Handle reverse sort ('-r/--reverse-sort')
-	ft_lstsort(&symbols, &elf_sym_cmp_64);
-	ft_lstiter(symbols, &elf_print_sym_64);
-	ft_lstclear(&symbols, NULL);
+	if (ret == 0)
+	{
+		// TODO: Handle comparison by address ('-n/-v/--numeric-sort')
+		// TODO: Handle no sort ('-p/--no-sort')
+		// TODO: Handle reverse sort ('-r/--reverse-sort')
+		ft_lstsort(&symbols, &elf_sym_cmp_64);
+		ft_lstiter(symbols, &elf_print_sym_64);
+		ft_lstclear(&symbols, NULL);
+	}
 	return (0);
 }
 

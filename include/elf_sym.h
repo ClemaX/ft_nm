@@ -26,7 +26,7 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
 
 t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
 
-t_list	*elf_load_syms_64(const t_elf_map_64 *map);
+int		elf_load_syms_64(t_list **dest, const t_elf_map_64 *map);
 
 int		elf_sym_cmp_64(void *a, void *b);
 

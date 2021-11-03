@@ -44,46 +44,58 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return identifier;
 }
 
+int		elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
+{
+	if (symbol->st_shndx > map->eh->e_shnum && !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
+	{
+		ft_printf("Invalid symbol: section header index(%u) exceeds e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
+		return ELF_EBADFMT;
+	}
+	return 0;
+}
+
 t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	t_list			*list_elem;
 	t_elf_sym_64	*new_sym;
 
 	list_elem = malloc(sizeof(*list_elem) + sizeof(*new_sym));
-	if (!list_elem)
-		return (NULL);
-	new_sym = (t_elf_sym_64*)(list_elem + 1);
-	new_sym->symbol = symbol;
-	new_sym->name = map->str + symbol->st_name;
-	new_sym->identifier = elf_sym_type_64(map, symbol);
-	list_elem->content = new_sym;
-	list_elem->next = NULL;
+	if (list_elem != NULL)
+	{	new_sym = (t_elf_sym_64*)(list_elem + 1);
+		new_sym->symbol = symbol;
+		new_sym->name = map->str + symbol->st_name;
+		new_sym->identifier = elf_sym_type_64(map, symbol);
+		list_elem->content = new_sym;
+		list_elem->next = NULL;
+	}
 	return (list_elem);
 }
 
-t_list	*elf_load_syms_64(const t_elf_map_64 *map)
+int	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
 {
-	t_list			*symbols;
 	t_list			*elem;
 	Elf64_Half		i;
+	int				ret;
 
-	symbols = NULL;
+	ret = 0;
+	*dest = NULL;
 	i = 0;
-	while (i < map->sym_count)
+	while (ret == 0 && i < map->sym_count)
 	{
-		if (*(map->str + map->sym[i].st_name))
+		ret = elf_sym_validate_64(map, map->sym + i);
+		if (ret == 0 && *(map->str + map->sym[i].st_name))
 		{
 			if (!(elem = elf_load_sym_64(map, map->sym + i)))
 			{
-				ft_lstclear(&symbols, NULL);
-				return (NULL);
+				ft_lstclear(dest, NULL);
+				return (-1);
 			}
 			//ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
-			ft_lstadd_front(&symbols, elem);
+			ft_lstadd_front(dest, elem);
 		}
 		i++;
 	}
-	return (symbols);
+	return (ret);
 }
 
 int	elf_sym_cmp_64(void *a, void *b)
