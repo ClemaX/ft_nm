@@ -4,17 +4,6 @@
 
 #include <inttypes.h>
 
-char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
-{
-	char	identifier = ELF_SYMID_UNKNOWN;
-
-	(void) map;
-	if (ELF64_ST_BIND(symbol->st_info) & STB_WEAK)
-		identifier = ELF_SYMID_WEAK;
-
-	return identifier;
-}
-
 /**
  * @brief	Identify a symbol according to it's location.
  * 
@@ -24,13 +13,20 @@ char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
  */
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	char	identifier = '?';
+	char	identifier = ELF_SYMID_UNKNOWN;
 
 	(void) map;
 	if (symbol->st_shndx == SHN_ABS)
 		identifier = ELF_SHID_ABS;
 	else if (symbol->st_shndx == SHN_COMMON)
 		identifier = ELF_SHID_COMMON;
+	else if (ELF64_ST_BIND(symbol->st_info) & STB_WEAK)
+	{
+		if (symbol->st_value == 0)
+			identifier = ELF_SYMID_WEAK;
+		else
+			identifier = ELF_SYMID_WEAK + 'A' - 'a';
+	}
 	else
 		identifier = map->shid[symbol->st_shndx];
 	// TODO: Handle overflow by using sh_count!
@@ -49,8 +45,7 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	char	identifier;
 
 	identifier = elf_sym_locate(map, symbol);
-
-	if (symbol->st_value == 0)
+	if (identifier == ELF_SYMID_UNKNOWN && symbol->st_value == 0)
 		identifier = ELF_SYMID_UNDEFINED;
 	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
@@ -176,7 +171,7 @@ void	elf_print_sym_64(void *data)
 	// TODO: Toggle this predicate using '-A/-o/--print-file-name' flag
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
 	{
-		if (sym->identifier == ELF_SYMID_UNDEFINED)
+		if (sym->identifier == ELF_SYMID_UNDEFINED || sym->identifier == ELF_SYMID_WEAK)
 			ft_printf("%16s %c %s\n", "",
 				sym->identifier, sym->name);
 		else
