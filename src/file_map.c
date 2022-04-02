@@ -7,7 +7,14 @@
 
 // TODO: ft_perror
 
-off_t	file_map(int fd, void**addr)
+/**
+ * @brief	Load a file's content into memory.
+ * 
+ * @param	fd		File handle.
+ * @param	addr	Destination pointer for the file's content.
+ * @return	off_t	File size or -1 in case of error.
+ */
+off_t	file_map(int fd, void **addr)
 {
 	struct stat	st;
 
@@ -26,6 +33,13 @@ off_t	file_map(int fd, void**addr)
 	return (st.st_size);
 }
 
+/**
+ * @brief	Release a loaded file's memory.
+ * 
+ * @param	addr	Pointer to the file's content.
+ * @param	size	File size.
+ * @return	int		Zero or -1 in case of error.
+ */
 int		file_unmap(void **addr, off_t size)
 {
 	const int	err = munmap(*addr, size);

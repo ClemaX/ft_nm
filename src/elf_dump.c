@@ -66,6 +66,12 @@ static int		elf_dump_64(const void *data, unsigned long size)
 	return (err);
 }
 
+/**
+ * @brief	Dump an opened ELF file.
+ * 
+ * @param	fd	The opened file's handle.
+ * @return	int	Zero or error code.
+ */
 int				elf_dump(int fd)
 {
 	void		*data;

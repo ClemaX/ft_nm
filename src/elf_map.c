@@ -3,6 +3,15 @@
 
 #include <stdlib.h>
 
+/**
+ * @brief	Compare a section's attributes to an identification hint.
+ * 
+ * @param	hint	Identification hint.
+ * @param	name	Section name.
+ * @param	type	Section type.
+ * @param	flags	Section flags.
+ * @return	int		Zero if matching, one otherwise.
+ */
 int		elf_map_shcmp(const t_elf_section_hint *hint, const char *name,
 	unsigned int type, Elf64_Xword flags)
 {
@@ -12,17 +21,25 @@ int		elf_map_shcmp(const t_elf_section_hint *hint, const char *name,
 		&& (hint->name == NULL || ft_strcmp(hint->name, name) == 0)));
 }
 
+/**
+ * @brief	Identify an ELF section given it's name, type and flags.
+ * 
+ * @param	name	Section name.
+ * @param	type	Section type.
+ * @param	flags	Section flags.
+ * @return	char	Section identifier.
+ */
 char	elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
 {
 	static const t_elf_section_hint	hints[] = {
-		{SHT_NOBITS, SHF_ALLOC | SHF_WRITE, ".bss", ELF_SHID_BSS},
-		{SHT_STRTAB, 0, ".strtab", ELF_SHID_STRTAB},
-		{SHT_SYMTAB, 0, ".symtab", ELF_SHID_SYMTAB},
-		{SHT_PROGBITS, 0, ".stab", ELF_SHID_STAB},
-		{SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR, NULL, ELF_SHID_TEXT},
-		{0, SHF_ALLOC | SHF_WRITE | SHF_IA_64_SHORT, NULL, ELF_SHID_SDATA},
-		{0, SHF_ALLOC | SHF_WRITE, NULL, ELF_SHID_DATA},
-		{0, SHF_ALLOC, NULL, ELF_SHID_READONLY},
+		{SHT_NOBITS,	SHF_ALLOC | SHF_WRITE,						".bss",		ELF_SHID_BSS},
+		{SHT_STRTAB,	0,											".strtab",	ELF_SHID_STRTAB},
+		{SHT_SYMTAB,	0,											".symtab",	ELF_SHID_SYMTAB},
+		{SHT_PROGBITS,	0,											".stab",	ELF_SHID_STAB},
+		{SHT_PROGBITS,	SHF_ALLOC | SHF_EXECINSTR,					NULL,		ELF_SHID_TEXT},
+		{0,				SHF_ALLOC | SHF_WRITE | SHF_IA_64_SHORT,	NULL,		ELF_SHID_SDATA},
+		{0,				SHF_ALLOC | SHF_WRITE,						NULL,		ELF_SHID_DATA},
+		{0,				SHF_ALLOC,									NULL,		ELF_SHID_READONLY},
 	};
 	unsigned char	i;
 	char			identifier;
@@ -39,6 +56,14 @@ char	elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
 	return identifier;
 }
 
+/**
+ * @brief	Map special ELF sections and check for duplicates.
+ * 
+ * @param	dest	The destination for the section's data pointer.
+ * @param	data	The section's data pointer.
+ * @param	name	The section's name, for error messages.
+ * @return	int		Zero or error code.
+ */
 int	elf_map_section(const void **dest, const void *data, const char *name)
 {
 	int	ret;
@@ -55,6 +80,7 @@ int	elf_map_section(const void **dest, const void *data, const char *name)
 	}
 	return ret;
 }
+
 /*
 typedef struct	s_elf_map_shid
 {
@@ -64,10 +90,17 @@ typedef struct	s_elf_map_shid
 
 
 	const t_elf_map_shid	map[] = {
-		{map->str, ELF_SHID_STRTAB}
+		{&map->str, ELF_SHID_STRTAB}
 	};
 */
 
+/**
+ * @brief	Map ELF sections names and identifiers from object data.
+ * 
+ * @param	map		Destination for mapped data.
+ * @param	data	ELF object data.
+ * @return	int		Zero or error code.
+ */
 int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 {
 	int		i;
@@ -108,8 +141,18 @@ int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 	return ret;
 }
 
+/**
+ * @brief	Map an ELF object's headers and sections.
+ * 
+ * @param	map		Destination for mapped data.
+ * @param	data	ELF object data.
+ * @param	size	ELF object data size.
+ * @return	int		Zero or error code.
+ */
 int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 {
+	int ret;
+
 	map->eh = (Elf64_Ehdr*)data;
 
 	if (size < sizeof(Elf64_Ehdr)
@@ -121,16 +164,21 @@ int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 		ft_dprintf(2, "Section header table offset: "PRIuOFF_T"\n", map->eh->e_shoff);
 		ft_dprintf(2, "Section header string table index: %hu\n", map->eh->e_shstrndx);
 
-		return (ELF_EBADFMT);
+		ret = ELF_EBADFMT;
 	}
-	map->ph = (Elf64_Phdr *)((unsigned char*)data + map->eh->e_phoff);
-	map->sh = (Elf64_Shdr *)((unsigned char*)data + map->eh->e_shoff);
-	if (map->eh->e_shstrndx != SHN_UNDEF)
-		map->shstr = (const char *)data + map->sh[map->eh->e_shstrndx].sh_offset;
 	else
-		map->shstr = (const char *)NULL;
-	map->str = NULL;
-	map->sym = NULL;
-	map->sym_count = 0;
-	return (elf_map_sections_64(map, data));
+	{
+		map->ph = (Elf64_Phdr *)((unsigned char*)data + map->eh->e_phoff);
+		map->sh = (Elf64_Shdr *)((unsigned char*)data + map->eh->e_shoff);
+		if (map->eh->e_shstrndx != SHN_UNDEF)
+			map->shstr = (const char *)data + map->sh[map->eh->e_shstrndx].sh_offset;
+		else
+			map->shstr = (const char *)NULL;
+		map->str = NULL;
+		map->sym = NULL;
+		map->sym_count = 0;
+
+		ret = elf_map_sections_64(map, data);
+	}
+	return (ret);
 }

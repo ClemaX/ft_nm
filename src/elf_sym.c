@@ -15,7 +15,13 @@ char	is_weak_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return identifier;
 }
 
-
+/**
+ * @brief	Identify a symbol according to it's location.
+ * 
+ * @param	map		Parsed ELF map.
+ * @param	symbol	ELF symbol.
+ * @return	char	Symbol identifier.
+ */
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	char	identifier = '?';
@@ -31,6 +37,13 @@ char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return identifier;
 }
 
+/**
+ * @brief	Identify a symbol according to it's location and attributes.
+ * 
+ * @param	map		Parsed ELF map.
+ * @param	symbol	ELF symbol.
+ * @return	char	Symbol identifier.	
+ */
 char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	char	identifier;
@@ -44,6 +57,13 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return identifier;
 }
 
+/**
+ * @brief	Validate a symbol's section header index.
+ * 
+ * @param	map		Parsed ELF map.
+ * @param	symbol	ELF symbol.
+ * @return	int		Zero or error code.
+ */
 int		elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	if (symbol->st_shndx > map->eh->e_shnum && !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
@@ -54,6 +74,13 @@ int		elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return 0;
 }
 
+/**
+ * @brief Load and identify a symbol into a list node.
+ * 
+ * @param	map		Parsed ELF map.
+ * @param	symbol	ELF symbol.
+ * @return	t_list*	Allocated list node or NULL in case of error.
+ */
 t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	t_list			*list_elem;
@@ -71,6 +98,13 @@ t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	return (list_elem);
 }
 
+/**
+ * @brief	Validate, load and identify ELF symbols into a linked-list.
+ * 
+ * @param	dest	Destination pointer for the head of the linked list.
+ * @param	map		Parsed ELF map.
+ * @return	int		Zero or error code.
+ */
 int	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
 {
 	t_list			*elem;
@@ -98,6 +132,13 @@ int	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
 	return (ret);
 }
 
+/**
+ * @brief	Compare two symbols names.
+ * 
+ * @param	a	Pointer to symbol a.
+ * @param	b	Pointer to symbol b.
+ * @return	int	The difference according to lexicographical order.
+ */
 int	elf_sym_cmp_64(void *a, void *b)
 {
 	const t_elf_sym_64 *const	sym_a = (t_elf_sym_64*)a;
@@ -136,12 +177,10 @@ void	elf_print_sym_64(void *data)
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
 	{
 		if (sym->identifier == ELF_SYMID_UNDEFINED)
-			ft_printf("%16s %c %s\n", "", sym->identifier, sym->name);
+			ft_printf("%16s %c %s\n", "",
+				sym->identifier, sym->name);
 		else
 			ft_printf("%016"PRIx64" %c %s\n",
-			sym->symbol->st_value,
-			sym->identifier,
-			sym->name);
+				sym->symbol->st_value, sym->identifier, sym->name);
 	}
-
 }
