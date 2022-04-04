@@ -22,10 +22,12 @@ char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 		identifier = ELF_SHID_COMMON;
 	else if (ELF64_ST_BIND(symbol->st_info) & STB_WEAK)
 	{
-		if (symbol->st_value == 0)
-			identifier = ELF_SYMID_WEAK;
+		if (ELF64_ST_TYPE(symbol->st_info) & STT_OBJECT)
+			identifier = ELF_SYMID_WEAKOBJ;
 		else
-			identifier = ELF_SYMID_WEAK + 'A' - 'a';
+			identifier = ELF_SYMID_WEAK;
+		if (symbol->st_value != 0)
+			identifier += 'A' - 'a';
 	}
 	else
 		identifier = map->shid[symbol->st_shndx];

@@ -3,13 +3,16 @@
 
 # include <libft.h>
 
-# include <elf_map.h>
+# include <elf_def.h>
 
+// Unknown symbol
 # define ELF_SYMID_UNKNOWN ELF_SHID_UNKNOWN
 // Undefined symbol
 # define ELF_SYMID_UNDEFINED 'U'
 // Unique global symbol
 # define ELF_SYMID_UNIQUE 'u'
+// Weakly bound object symbol
+# define ELF_SYMID_WEAKOBJ 'v'
 // Weakly bound symbol
 # define ELF_SYMID_WEAK 'w'
 

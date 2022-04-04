@@ -1,6 +1,8 @@
 #ifndef ELF_DUMP_H
 # define ELF_DUMP_H
 
-int	elf_dump(int fd);
+#include <elf_def.h>
+
+t_elf_err	elf_dump(int fd);
 
 #endif
