@@ -168,7 +168,7 @@ int	elf_sym_cmp_64(void *a, void *b)
 void	elf_print_sym_64(void *data)
 {
 	const t_elf_sym_64 *const	sym = (t_elf_sym_64*)data;
-
+	Elf64_Addr					sym_value;
 
 	// TODO: Toggle this predicate using '-A/-o/--print-file-name' flag
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
@@ -177,7 +177,14 @@ void	elf_print_sym_64(void *data)
 			ft_printf("%16s %c %s\n", "",
 				sym->identifier, sym->name);
 		else
+		{
+			if (sym->identifier == ELF_SHID_COMMON
+			|| sym->identifier == ELF_SHID_COMMON + ('A' - 'a'))
+				sym_value = sym->symbol->st_size;
+			else
+				sym_value = sym->symbol->st_value;
 			ft_printf("%016"PRIx64" %c %s\n",
-				sym->symbol->st_value, sym->identifier, sym->name);
+				sym_value, sym->identifier, sym->name);
+		}
 	}
 }
