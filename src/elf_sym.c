@@ -15,7 +15,6 @@ char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	char	identifier = ELF_SYMID_UNKNOWN;
 
-	(void) map;
 	if (symbol->st_shndx == SHN_ABS)
 		identifier = ELF_SHID_ABS;
 	else if (symbol->st_shndx == SHN_COMMON)
@@ -26,12 +25,11 @@ char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 			identifier = ELF_SYMID_WEAKOBJ;
 		else
 			identifier = ELF_SYMID_WEAK;
-		if (symbol->st_value != 0)
+		if (map->sh[symbol->st_shndx].sh_flags & SHF_ALLOC)
 			identifier += 'A' - 'a';
 	}
 	else
 		identifier = map->shid[symbol->st_shndx];
-	// TODO: Handle overflow by using sh_count!
 	return identifier;
 }
 
@@ -63,9 +61,11 @@ char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
  */
 int		elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	if (symbol->st_shndx > map->eh->e_shnum && !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
+	if (symbol->st_shndx > map->eh->e_shnum
+	&& !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
 	{
-		ft_printf("Invalid symbol: section header index(%u) exceeds e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
+		ft_printf("Invalid symbol: section header index(%u) exceeds \
+e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
 		return ELF_EBADFMT;
 	}
 	return 0;
@@ -170,12 +170,14 @@ void	elf_print_sym_64(void *data)
 	const t_elf_sym_64 *const	sym = (t_elf_sym_64*)data;
 	Elf64_Addr					sym_value;
 
+	// TODO: Handle variable value size
 	// TODO: Toggle this predicate using '-A/-o/--print-file-name' flag
 	if (ELF32_ST_TYPE(sym->symbol->st_info) != STT_FILE)
 	{
-		if (sym->identifier == ELF_SYMID_UNDEFINED || sym->identifier == ELF_SYMID_WEAK)
-			ft_printf("%16s %c %s\n", "",
-				sym->identifier, sym->name);
+		if (sym->identifier == ELF_SYMID_UNDEFINED
+		|| sym->identifier == ELF_SYMID_WEAK
+		|| sym->identifier == ELF_SYMID_WEAKOBJ)
+			ft_printf("%16s %c %s\n", "", sym->identifier, sym->name);
 		else
 		{
 			if (sym->identifier == ELF_SHID_COMMON

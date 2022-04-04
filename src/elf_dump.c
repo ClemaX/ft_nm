@@ -86,9 +86,7 @@ t_elf_err		elf_dump(int fd)
 		err = ELF_EIRREG;
 	else
 	{
-		//ft_printf("Data size: "PRIuOFF_T" bytes\n", size);
 		elf_class = elf_ident(data, (unsigned long)size);
-		//ft_printf("File class: %d\n", elf_class);
 		if (elf_class == ELFCLASS32)
 			err = elf_dump_32(data, (unsigned long)size);
 		else if (elf_class == ELFCLASS64)

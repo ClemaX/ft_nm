@@ -20,9 +20,11 @@ static int	elf_perror(const char *prog, const char *file, t_elf_err err)
 		else
 		{
 			if (err == ELF_EBADFMT)
-				ft_dprintf(STDERR_FILENO, "%s: %s: file format not recognized\n", prog, file);
+				ft_dprintf(STDERR_FILENO,
+					"%s: %s: file format not recognized\n", prog, file);
 			else if (err == ELF_EISDIR)
-				ft_dprintf(STDERR_FILENO, "%s: Warning: '%s' is a directory\n", prog, file);
+				ft_dprintf(STDERR_FILENO,
+					"%s: Warning: '%s' is a directory\n", prog, file);
 			ret = 1;
 		}
 	}
