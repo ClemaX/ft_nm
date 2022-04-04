@@ -1,18 +1,25 @@
-FROM alpine
+FROM alpine as builder
 
 RUN apk add --no-cache bash clang make libc-dev binutils build-base
 
-RUN adduser --disabled-password --no-create-home --home /build -s /bin/bash runner runner
+RUN adduser --disabled-password --no-create-home --home /build -s /bin/bash builder builder
 
+COPY --chown=builder:builder . /build
 
-COPY --chown=runner:runner . /build
-
-USER runner
+USER builder
 WORKDIR /build
 
-RUN chmod +x NM_TESTER.sh && make NAME=ft_nm
+RUN make NAME=ft_nm
 
-SHELL ["/bin/bash", "-c"]
-# ./NM_TESTER.sh
+
+FROM alpine
+
+RUN adduser --disabled-password --no-create-home --home /build -s /bin/bash runner runner
+
+USER runner
+
+COPY --from=builder --chown=runner:runner /build/ft_nm /build/ft_nm
+
+WORKDIR /build
+
 CMD ./ft_nm ft_nm
-
