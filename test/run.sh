@@ -25,10 +25,22 @@ ln -s "$PWD/$FT_NM" "$TMP_DIR/nm"
 # Compare nm outputs and status codes
 nm_diff() # arguments
 {
-	diff \
+	diff "--color=$DIFF_COLOR" \
 		<(LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?") \
 		<(PATH="$TMP_DIR"; LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?")
 }
+
+if [ -t 1 ]
+then
+	COLOR_ARCH='\e[36m'
+	COLOR_PASS='\e[32m'
+	COLOR_FAIL='\e[31m'
+	COLOR_RESET='\e[0m'
+	DIFF_COLOR=always
+else
+	COLOR_ARCH= COLOR_PASS= COLOR_FAIL= COLOR_RESET=
+	DIFF_COLOR=never
+fi
 
 for arch in "${ARCHITECTURES[@]}"
 do
@@ -47,9 +59,11 @@ do
 			continue
 		fi
 
-		printf '%-5s %-23s ' "$arch" "$(basename "$test")" >&2
+		printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "$arch" "$(basename "$test")"
 
-		nm_diff test.o && echo '✓' || :
+		DIFF=$(nm_diff test.o) \
+		&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
+		|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
 
 		rm test.o
 	done
