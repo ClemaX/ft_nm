@@ -6,6 +6,13 @@ TEST_DIR=$(dirname "$0")
 
 FT_NM="$TEST_DIR/../ft_nm"
 
+ARCHITECTURES=("elf64" "elf32")
+
+AS=nasm
+CC=clang
+
+CFLAGS="-Wall -Wextra -Wno-unused-command-line-argument"
+
 # Create temporary directory for fake path
 export TMP_DIR=$(mktemp -d)
 
@@ -23,21 +30,27 @@ nm_diff() # arguments
 		<(PATH="$TMP_DIR"; LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?")
 }
 
-for test in "$TEST_DIR/"*/
+for arch in "${ARCHITECTURES[@]}"
 do
-	if [ -f "$test/test.s" ]
-	then
-		nasm -f elf64 "$test/test.s" -o test.o
-	elif [ -f "$test/test.c" ]
-	then
-		clang -c "$test/test.c" -o test.o
-	else
-		continue
-	fi
+	COMPILE_s="$AS -f$arch"
+	COMPILE_c="$CC $CFLAGS -arch$arch"
 
-	printf %-24s "$(basename "$test") " >&2
+	for test in "$TEST_DIR/"*/
+	do
+		if [ -f "$test/test.s" ]
+		then
+			$COMPILE_s "$test/test.s" -o test.o
+		elif [ -f "$test/test.c" ]
+		then
+			$COMPILE_c -c "$test/test.c" -o test.o
+		else
+			continue
+		fi
 
-	nm_diff test.o && echo '✓' || :
+		printf '%-5s %-23s ' "$arch" "$(basename "$test")" >&2
 
-	rm test.o
+		nm_diff test.o && echo '✓' || :
+
+		rm test.o
+	done
 done
