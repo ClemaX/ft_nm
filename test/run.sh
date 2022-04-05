@@ -6,18 +6,21 @@ TEST_DIR=$(dirname "$0")
 
 FT_NM="$TEST_DIR/../ft_nm"
 
-# Sort using lexicographical comparison
-export LC_COLLATE=C
-
+# Create temporary directory for fake path
 export TMP_DIR=$(mktemp -d)
 
+# Compile ft_nm if it does not exist
+[ -f "$FT_NM" ] || make -C "$(dirname "$FT_NM")" NAME="$(basename "$FT_NM")"
+
+# Link ft_nm to fake nm in temporary directory
 ln -s "$PWD/$FT_NM" "$TMP_DIR/nm"
 
-nm_diff() # object
+# Compare nm outputs and status codes
+nm_diff() # arguments
 {
 	diff \
-		<(nm "$1" 2>&1 || echo "status: $?") \
-		<(PATH="$TMP_DIR"; nm "$1" 2>&1 || echo "status: $?")
+		<(LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?") \
+		<(PATH="$TMP_DIR"; LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?")
 }
 
 for test in "$TEST_DIR/"*/
