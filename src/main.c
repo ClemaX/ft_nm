@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <libft.h>
 
@@ -49,7 +50,14 @@ int	main(int ac, char **av)
 	{
 		if ((fd = open(av[i], O_RDONLY)) == -1)
 		{
-			perror("open");
+			if (errno == ENOENT)
+				ft_dprintf(STDERR_FILENO,
+					"%s: '%s': No such file\n", av[0], av[i]);
+			else if (errno == EACCES)
+				ft_dprintf(STDERR_FILENO,
+					"%s: %s: Permission denied\n", av[0], av[i]);
+			else
+				perror("open");
 			err = ELF_ESYS;
 			ret++;
 		}
