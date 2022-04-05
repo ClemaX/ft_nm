@@ -15,6 +15,8 @@
 # define ELF_SYMID_WEAKOBJ 'v'
 // Weakly bound symbol
 # define ELF_SYMID_WEAK 'w'
+// Indirect object symbol
+# define ELF_SYMID_INDIRECT 'i'
 
 typedef struct	s_elf_sym
 {
