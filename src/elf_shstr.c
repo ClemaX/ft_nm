@@ -1,5 +1,6 @@
+#include <stddef.h>
+
 #include <elf_map.h>
-#include <stdlib.h>
 
 /**
  * @brief	Get a pointer to a section header string, given it's offset.

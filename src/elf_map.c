@@ -4,59 +4,6 @@
 #include <stdlib.h>
 
 /**
- * @brief	Compare a section's attributes to an identification hint.
- * 
- * @param	hint	Identification hint.
- * @param	name	Section name.
- * @param	type	Section type.
- * @param	flags	Section flags.
- * @return	int		Zero if matching, one otherwise.
- */
-int		elf_map_shcmp(const t_elf_section_hint *hint, const char *name,
-	unsigned int type, Elf64_Xword flags)
-{
-	//ft_printf("%s: Hint flags: %llu, flags: %llu, match: %d\n", name, hint->flags, flags, (hint->flags & flags) == hint->flags);
-	return (!((hint->type == 0 || hint->type == type)
-		&& (hint->flags & flags) == hint->flags
-		&& (hint->name == NULL || ft_strcmp(hint->name, name) == 0)));
-}
-
-/**
- * @brief	Identify an ELF section given it's name, type and flags.
- * 
- * @param	name	Section name.
- * @param	type	Section type.
- * @param	flags	Section flags.
- * @return	char	Section identifier.
- */
-char	elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
-{
-	static const t_elf_section_hint	hints[] = {
-		{SHT_NOBITS,	SHF_ALLOC | SHF_WRITE,						".bss",		ELF_SHID_BSS},
-		{SHT_STRTAB,	0,											".strtab",	ELF_SHID_STRTAB},
-		{SHT_SYMTAB,	0,											".symtab",	ELF_SHID_SYMTAB},
-		{SHT_PROGBITS,	0,											".stab",	ELF_SHID_STAB},
-		{SHT_PROGBITS,	SHF_ALLOC | SHF_EXECINSTR,					NULL,		ELF_SHID_TEXT},
-		{0,				SHF_ALLOC | SHF_WRITE | SHF_IA_64_SHORT,	NULL,		ELF_SHID_SDATA},
-		{0,				SHF_ALLOC | SHF_WRITE,						NULL,		ELF_SHID_DATA},
-		{0,				SHF_ALLOC,									NULL,		ELF_SHID_READONLY},
-	};
-	unsigned char	i;
-	char			identifier;
-
-	i = 0;
-	while (i != sizeof(hints) / sizeof(*hints)
-	&& elf_map_shcmp(hints + i, name, type, flags) != 0)
-		i++;
-	if (i == sizeof(hints) / sizeof(*hints))
-		identifier = ELF_SHID_UNKNOWN;
-	else
-		identifier = hints[i].identifier;
-	//ft_printf(" %c\n", identifier);
-	return identifier;
-}
-
-/**
  * @brief	Map special ELF sections and check for duplicates.
  * 
  * @param	dest	The destination for the section's data pointer.
@@ -64,7 +11,7 @@ char	elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
  * @param	name	The section's name, for error messages.
  * @return	int		Zero or error code.
  */
-int	elf_map_section(const void **dest, const void *data, const char *name)
+static int	elf_map_section(const void **dest, const void *data, const char *name)
 {
 	int	ret;
 
@@ -81,19 +28,6 @@ int	elf_map_section(const void **dest, const void *data, const char *name)
 	return ret;
 }
 
-/*
-typedef struct	s_elf_map_shid
-{
-	void	**dest;
-	char	identifier;
-}				t_elf_map_shid
-
-
-	const t_elf_map_shid	map[] = {
-		{&map->str, ELF_SHID_STRTAB}
-	};
-*/
-
 /**
  * @brief	Map ELF sections names and identifiers from object data.
  * 
@@ -101,7 +35,7 @@ typedef struct	s_elf_map_shid
  * @param	data	ELF object data.
  * @return	int		Zero or error code.
  */
-int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
+static int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 {
 	int		i;
 	int		ret;
