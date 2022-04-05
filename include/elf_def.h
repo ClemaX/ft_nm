@@ -42,9 +42,11 @@ typedef struct	s_elf_map_32
 	const Elf32_Ehdr	*eh;
 	const Elf32_Phdr	*ph;
 	const Elf32_Shdr	*sh;
-	const Elf64_Sym		*sym;
+	char				*shid;
 	const char			*str;
 	const char			*shstr;
+	const Elf32_Sym		*sym;
+	Elf32_Xword			sym_count;
 }				t_elf_map_32;
 
 // This struct is used as a predicate to match sections
