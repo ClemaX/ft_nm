@@ -16,23 +16,27 @@
 // Weakly bound symbol
 # define ELF_SYMID_WEAK 'w'
 
-typedef struct	s_elf_sym_64
+typedef struct	s_elf_sym
 {
-	const Elf64_Sym	*symbol;
+	const void		*symbol;
+	Elf64_Addr		value;
 	const char		*name;
 	char			identifier;
-}				t_elf_sym_64;
+}				t_elf_sym;
 
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol);
 
 char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
+char	elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol);
 
 t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
+t_list	*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol);
 
 int		elf_load_syms_64(t_list **dest, const t_elf_map_64 *map);
+int		elf_load_syms_32(t_list **dest, const t_elf_map_32 *map);
 
-int		elf_sym_cmp_64(void *a, void *b);
+int		elf_sym_cmp(void *a, void *b);
 
-void	elf_print_sym_64(void *data);
+void	elf_print_sym(void *data);
 
 #endif
