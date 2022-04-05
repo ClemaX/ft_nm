@@ -25,7 +25,7 @@ char	elf_sym_locate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 			identifier = ELF_SYMID_WEAKOBJ;
 		else
 			identifier = ELF_SYMID_WEAK;
-		if (map->sh[symbol->st_shndx].sh_flags & SHF_ALLOC)
+		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
 			identifier += 'A' - 'a';
 	}
 	else
@@ -54,7 +54,7 @@ char	elf_sym_locate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 			identifier = ELF_SYMID_WEAKOBJ;
 		else
 			identifier = ELF_SYMID_WEAK;
-		if (map->sh[symbol->st_shndx].sh_flags & SHF_ALLOC)
+		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
 			identifier += 'A' - 'a';
 	}
 	else
