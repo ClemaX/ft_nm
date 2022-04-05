@@ -39,6 +39,7 @@ int		elf_load_syms_32(t_list **dest, const t_elf_map_32 *map);
 
 int		elf_sym_cmp(void *a, void *b);
 
-void	elf_print_sym(void *data);
+void	elf_print_sym_64(void *data);
+void	elf_print_sym_32(void *data);
 
 #endif

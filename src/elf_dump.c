@@ -33,7 +33,7 @@ static t_elf_err	elf_dump_syms_64(const t_elf_map_64 *map)
 		// TODO: Handle no sort ('-p/--no-sort')
 		// TODO: Handle reverse sort ('-r/--reverse-sort')
 		ft_lstsort(&symbols, &elf_sym_cmp);
-		ft_lstiter(symbols, &elf_print_sym);
+		ft_lstiter(symbols, &elf_print_sym_64);
 		ft_lstclear(&symbols, NULL);
 	}
 	return (err);
@@ -69,7 +69,7 @@ static t_elf_err	elf_dump_syms_32(const t_elf_map_32 *map)
 		// TODO: Handle no sort ('-p/--no-sort')
 		// TODO: Handle reverse sort ('-r/--reverse-sort')
 		ft_lstsort(&symbols, &elf_sym_cmp);
-		ft_lstiter(symbols, &elf_print_sym);
+		ft_lstiter(symbols, &elf_print_sym_32);
 		ft_lstclear(&symbols, NULL);
 	}
 	return (err);
