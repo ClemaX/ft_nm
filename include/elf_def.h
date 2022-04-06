@@ -24,6 +24,7 @@ typedef enum	e_elf_err
 # define ELF_SHID_READONLY 'r'
 # define ELF_SHID_SDATA 's'
 # define ELF_SHID_TEXT 't'
+# define ELF_SHID_UNDEFINED 'U'
 # define ELF_SHID_STAB '-'
 
 typedef struct	s_elf_map_64

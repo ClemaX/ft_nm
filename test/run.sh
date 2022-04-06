@@ -25,9 +25,15 @@ ln -s "$PWD/$FT_NM" "$TMP_DIR/nm"
 # Compare nm outputs and status codes
 nm_diff() # arguments
 {
+	local GREP=$(which grep)
+
 	diff "--color=$DIFF_COLOR" \
-		<(LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?") \
-		<(PATH="$TMP_DIR"; LC_COLLATE=C nm "$1" 2>&1 || echo "status: $?")
+		<(set -o pipefail; LC_COLLATE=C \
+			nm "$1" 2>&1 | "$GREP" -v "bfd plugin" \
+			|| echo "status: $?") \
+		<(set -o pipefail; PATH="$TMP_DIR"; LC_COLLATE=C \
+			nm "$1" 2>&1 | "$GREP" -v "bfd plugin" \
+			|| echo "status: $?")
 }
 
 if [ -t 1 ]

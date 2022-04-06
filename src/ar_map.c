@@ -35,13 +35,13 @@ long		ar_size(const struct ar_hdr *header)
 			i++;
 		if (i != str_len)
 		{
-			ft_dprintf(2, "ar: Invalid header: ar_size length: %u, offending characters: %.*s\n", i, str_len - i, header->ar_size + i);
+			//ft_dprintf(2, "ar: Invalid header: ar_size length: %u, offending characters: %.*s\n", i, str_len - i, header->ar_size + i);
 			size = -1;
 		}
 	}
 	else
 	{
-		ft_dprintf(2, "ar: invalid file magic byte: '%.2s'!\n", header->ar_fmag);
+		//ft_dprintf(2, "ar: invalid file magic byte: '%.2s'!\n", header->ar_fmag);
 		size = -1;
 	}
 	return size;

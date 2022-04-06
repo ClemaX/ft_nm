@@ -28,7 +28,7 @@ static uint8_t	elf_ident(const void *data, unsigned long size)
 
 t_elf_err		elf_dump(const void *data, unsigned long size, const char *name)
 {
-	const int		elf_class = elf_ident(data, size);
+	const uint8_t	elf_class = elf_ident(data, size);
 	t_elf_map_64	map;
 	t_elf_funs		funs[2] = (t_elf_funs[]){
 		{
@@ -49,19 +49,28 @@ t_elf_err		elf_dump(const void *data, unsigned long size, const char *name)
 
 	if (elf_class != ELFCLASSNONE)
 	{
-		err = funs[elf_class - 1].map(&map, data, size);
-		if (err == 0)
+		if (elf_class <= sizeof(funs) / sizeof(*funs))
 		{
-			err = funs[elf_class - 1].load(&symbols, &map);
+			err = funs[elf_class - 1].map(&map, data, size);
 			if (err == 0)
 			{
-				if (name != NULL)
-					ft_dprintf(STDERR_FILENO, "\n%s:\n", name);
-				ft_lstsort(&symbols, elf_sym_cmp);
-				ft_lstiter(symbols, funs[elf_class - 1].print);
-				ft_lstclear(&symbols, NULL);
+				err = funs[elf_class - 1].load(&symbols, &map);
+				if (err == 0)
+				{
+					if (name != NULL)
+						ft_dprintf(STDERR_FILENO, "\n%s:\n", name);
+					ft_lstsort(&symbols, elf_sym_cmp);
+					ft_lstiter(symbols, funs[elf_class - 1].print);
+					ft_lstclear(&symbols, NULL);
+				}
+				funs[elf_class - 1].unmap(&map);
 			}
-			funs[elf_class - 1].unmap(&map);
+		}
+		else
+		{
+			if (name != NULL)
+				ft_dprintf(STDERR_FILENO, "\n%s:\n", name);
+			err = ELF_ENOSYMS;
 		}
 	}
 	else

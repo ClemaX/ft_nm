@@ -14,9 +14,9 @@ int	ft_nm_perror(const char *prog, const char *file, t_elf_err err)
 	int ret;
 
 	ret = 0;
-	if (err == ELF_ESYS)
+	/* if (err == ELF_ESYS)
 		perror(prog);
-	else if (err != ELF_EOK)
+	else */if (err != ELF_EOK)
 	{
 		if (err == ELF_ENOSYMS)
 			ft_dprintf(STDERR_FILENO, "%s: %s: no symbols\n", prog, file);

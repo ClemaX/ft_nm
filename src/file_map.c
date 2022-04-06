@@ -1,7 +1,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include <file_map.h>
 
@@ -21,7 +20,7 @@ off_t	file_map(int fd, void **addr)
 
 	if (fstat(fd, &st) == -1)
 	{
-		perror("fstat");
+		//perror("fstat");
 		ret = -1;
 	}
 	else
@@ -35,7 +34,7 @@ off_t	file_map(int fd, void **addr)
 			*addr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 			if (*addr == (void*)-1)
 			{
-				perror("mmap");
+				//perror("mmap");
 				*addr = NULL;
 				ret = FILE_ESYS;
 			}
@@ -57,8 +56,8 @@ int		file_unmap(void **addr, off_t size)
 {
 	const int	err = munmap(*addr, size);
 
-	if (err == -1)
-		perror ("munmap");
+	//if (err == -1)
+	//	perror ("munmap");
 	*addr = NULL;
 	return (err);
 }

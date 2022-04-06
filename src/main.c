@@ -7,7 +7,6 @@
 
 #include <ft_nm.h>
 
-// TODO: Handle ar archives
 // TODO: Use 'a.out' as default objfile argument
 // TODO: Handle big-endian encoding
 // TODO: Handle 32-bit files (using unions?)
@@ -29,5 +28,7 @@ int	main(int ac, char **av)
 			ret += 1;
 		i++;
 	}
+	if (ret == -1)
+		ret = -ret;
 	return (ret);
 }

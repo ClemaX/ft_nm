@@ -28,6 +28,8 @@ static char	elf_sym_locate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
 			identifier += 'A' - 'a';
 	}
+	else if (symbol->st_shndx == SHN_UNDEF)
+		identifier = ELF_SHID_UNDEFINED;
 	else if (ELF64_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC)
 		identifier = ELF_SYMID_INDIRECT;
 	else
@@ -59,6 +61,8 @@ static char	elf_sym_locate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
 			identifier += 'A' - 'a';
 	}
+	else if (symbol->st_shndx == SHN_UNDEF)
+		identifier = ELF_SHID_UNDEFINED;
 	else if ((ELF32_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC))
 		identifier = ELF_SYMID_INDIRECT;
 	else
@@ -78,8 +82,6 @@ char		elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	char	identifier;
 
 	identifier = elf_sym_locate_64(map, symbol);
-	if (identifier == ELF_SYMID_UNKNOWN && symbol->st_value == 0)
-		identifier = ELF_SYMID_UNDEFINED;
 	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
 	return identifier;
@@ -97,8 +99,6 @@ char		elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 	char	identifier;
 
 	identifier = elf_sym_locate_32(map, symbol);
-	if (identifier == ELF_SYMID_UNKNOWN && symbol->st_value == 0)
-		identifier = ELF_SYMID_UNDEFINED;
 	if (ft_islower(identifier) && ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
 	return identifier;
@@ -130,7 +130,7 @@ e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
  * @param	symbol	32 bit ELF symbol.
  * @return	int		Zero or error code.
  */
-int			elf_sym_validate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
+t_elf_err	elf_sym_validate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 {
 	if (symbol->st_shndx > map->eh->e_shnum
 	&& !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
@@ -203,73 +203,79 @@ t_list		*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 /**
  * @brief	Validate, load and identify 64 bit ELF symbols into a linked-list.
  * 
- * @param	dest	Destination pointer for the head of the linked list.
- * @param	map		Parsed 64 bit ELF map.
- * @return	int		Zero or error code.
+ * @param	dest		Destination pointer for the head of the linked list.
+ * @param	map			Parsed 64 bit ELF map.
+ * @return	t_elf_err	Zero or error code.
  */
-int			elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
+t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
 {
 	t_list			*elem;
 	Elf64_Half		i;
-	int				ret;
+	int				err;
 
-	ret = 0;
+	err = ELF_EOK;
 	*dest = NULL;
 	i = 0;
-	while (ret == 0 && i < map->sym_count)
+	while (err == ELF_EOK && i < map->sym_count)
 	{
-		ret = elf_sym_validate_64(map, map->sym + i);
-		if (ret == 0
+		err = elf_sym_validate_64(map, map->sym + i);
+		if (err == ELF_EOK
 		&& *(map->str + map->sym[i].st_name) != '\0'
 		&& ELF64_ST_TYPE(map->sym[i].st_info) != STT_FILE)
 		{
-			if (!(elem = elf_load_sym_64(map, map->sym + i)))
+			elem = elf_load_sym_64(map, map->sym + i);
+			if (elem != NULL)
+				ft_lstadd_front(dest, elem);
+			else
 			{
 				ft_lstclear(dest, NULL);
-				return (-1);
+				err = ELF_ESYS;
 			}
-			//ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
-			ft_lstadd_front(dest, elem);
 		}
 		i++;
 	}
-	return (ret);
+	if (err == ELF_EOK && *dest == NULL)
+		err = ELF_ENOSYMS;
+	return (err);
 }
 
 /**
  * @brief	Validate, load and identify 32 bit ELF symbols into a linked-list.
  * 
- * @param	dest	Destination pointer for the head of the linked list.
- * @param	map		Parsed 32 bit ELF map.
- * @return	int		Zero or error code.
+ * @param	dest		Destination pointer for the head of the linked list.
+ * @param	map			Parsed 32 bit ELF map.
+ * @return	t_elf_err	Zero or error code.
  */
-int			elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map)
+t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map)
 {
 	t_list			*elem;
 	Elf32_Half		i;
-	int				ret;
+	int				err;
 
-	ret = 0;
+	err = ELF_EOK;
 	*dest = NULL;
 	i = 0;
-	while (ret == 0 && i < map->sym_count)
+	while (err == ELF_EOK && i < map->sym_count)
 	{
-		ret = elf_sym_validate_32(map, map->sym + i);
-		if (ret == 0
+		err = elf_sym_validate_32(map, map->sym + i);
+		if (err == ELF_EOK
 		&& *(map->str + map->sym[i].st_name) != '\0'
 		&& ELF32_ST_TYPE(map->sym[i].st_info) != STT_FILE)
 		{
-			if (!(elem = elf_load_sym_32(map, map->sym + i)))
+			elem = elf_load_sym_32(map, map->sym + i);
+			if (elem != NULL)
+				ft_lstadd_front(dest, elem);
+			else
 			{
 				ft_lstclear(dest, NULL);
-				return (-1);
+				err = ELF_ESYS;
 			}
-			//ft_printf("Loading %d->%s...\n", map->sym[i].st_shndx, map->str + map->sym[i].st_name);
-			ft_lstadd_front(dest, elem);
 		}
 		i++;
 	}
-	return (ret);
+	if (err == ELF_EOK && *dest == NULL)
+		err = ELF_ENOSYMS;
+	return (err);
 }
 
 /**
