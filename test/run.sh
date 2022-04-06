@@ -42,29 +42,38 @@ else
 	DIFF_COLOR=never
 fi
 
+OUTFILE="$TMP_DIR/test.o"
+
 for arch in "${ARCHITECTURES[@]}"
 do
-	COMPILE_s="$AS -f$arch"
-	COMPILE_c="$CC $CFLAGS -arch$arch"
+	COMPILE_s="$AS -f$arch -o $OUTFILE"
+	COMPILE_c="$CC $CFLAGS -arch$arch -o $OUTFILE"
+	MAKE="make NAME=$OUTFILE FORMAT=$arch"
+
+	CLEANUP="rm $OUTFILE"
 
 	for test in "$TEST_DIR/"*/
 	do
 		if [ -f "$test/test.s" ]
 		then
-			$COMPILE_s "$test/test.s" -o test.o
+			$COMPILE_s "$test/test.s"
 		elif [ -f "$test/test.c" ]
 		then
-			$COMPILE_c -c "$test/test.c" -o test.o
+			$COMPILE_c -c "$test/test.c"
+		elif [ -f "$test/Makefile" ]
+		then
+			$MAKE -C "$test" >/dev/null
+			CLEANUP="$MAKE -C "$test" fclean"
 		else
 			continue
 		fi
 
 		printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "$arch" "$(basename "$test")"
 
-		DIFF=$(nm_diff test.o) \
+		DIFF=$(nm_diff $OUTFILE) \
 		&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
 		|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
 
-		rm test.o
+		$CLEANUP >/dev/null
 	done
 done

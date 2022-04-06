@@ -3,6 +3,7 @@ ft_nm
 obj/
 *.out
 *.o
+*.a
 
 # macOS
 .DS_Store
