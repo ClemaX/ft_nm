@@ -29,10 +29,10 @@ nm_diff() # arguments
 
 	diff "--color=$DIFF_COLOR" \
 		<(set -o pipefail; LC_COLLATE=C \
-			nm "$1" 2>&1 | "$GREP" -v "bfd plugin" \
+			nm "$@" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?") \
 		<(set -o pipefail; PATH="$TMP_DIR"; LC_COLLATE=C \
-			nm "$1" 2>&1 | "$GREP" -v "bfd plugin" \
+			nm "$@" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?")
 }
 
@@ -83,3 +83,8 @@ do
 		$CLEANUP >/dev/null
 	done
 done
+printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "99-no_arguments"
+
+DIFF=$(nm_diff) \
+	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
+	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"

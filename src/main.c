@@ -19,6 +19,8 @@ int	main(int ac, char **av)
 	i = 1;
 	ret = 0;
 	err = 0;
+	if (ac == 1)
+		ac++;
 	while (ret != -1 && i < ac)
 	{
 		err = ft_nm(av[0], av[i]);

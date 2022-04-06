@@ -5,6 +5,7 @@
 
 #include <libft.h>
 
+#include <ft_nm.h>
 #include <file_map.h>
 #include <elf_dump.h>
 #include <ar_dump.h>
@@ -14,9 +15,7 @@ int	ft_nm_perror(const char *prog, const char *file, t_elf_err err)
 	int ret;
 
 	ret = 0;
-	/* if (err == ELF_ESYS)
-		perror(prog);
-	else */if (err != ELF_EOK)
+	if (err != ELF_EOK)
 	{
 		if (err == ELF_ENOSYMS)
 			ft_dprintf(STDERR_FILENO, "%s: %s: no symbols\n", prog, file);
@@ -43,6 +42,9 @@ int	ft_nm(const char *prog, const char *filename)
 	off_t		size;
 	int			fd;
 	t_elf_err	err;
+
+	if (filename == NULL)
+		filename = FT_NM_DEFAULT;
 	
 	if ((fd = open(filename, O_RDONLY)) != -1)
 	{
