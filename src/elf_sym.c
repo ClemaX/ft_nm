@@ -25,7 +25,7 @@ static char	elf_sym_locate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 			identifier = ELF_SYMID_WEAKOBJ;
 		else
 			identifier = ELF_SYMID_WEAK;
-		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
+		if (symbol->st_shndx != SHN_UNDEF)
 			identifier += 'A' - 'a';
 	}
 	else if (symbol->st_shndx == SHN_UNDEF)
@@ -58,7 +58,7 @@ static char	elf_sym_locate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 			identifier = ELF_SYMID_WEAKOBJ;
 		else
 			identifier = ELF_SYMID_WEAK;
-		if (map->sh[symbol->st_shndx].sh_type & (SHT_PROGBITS | SHT_NOBITS))
+		if (symbol->st_shndx != SHN_UNDEF)
 			identifier += 'A' - 'a';
 	}
 	else if (symbol->st_shndx == SHN_UNDEF)
@@ -107,8 +107,8 @@ char		elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 /**
  * @brief	Validate a 64 bit ELF symbol's section header index.
  * 
- * @param	map		Parsed ELF map.
- * @param	symbol	ELF symbol.
+ * @param	map		Parsed 64 bit ELF map.
+ * @param	symbol	64 bit ELF symbol.
  * @return	int		Zero or error code.
  */
 int			elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
