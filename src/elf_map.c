@@ -131,7 +131,7 @@ static int	elf_map_sections_32(t_elf_map_32 *map, const void *data)
  * @param	size	ELF object data size.
  * @return	int		Zero or error code.
  */
-int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
+int		elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 {
 	int ret;
 
@@ -169,7 +169,7 @@ int	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
  * @param	size	ELF object data size.
  * @return	int		Zero or error code.
  */
-int	elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
+int		elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
 {
 	int ret;
 
@@ -197,4 +197,16 @@ int	elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
 		ret = elf_map_sections_32(map, data);
 	}
 	return (ret);
+}
+
+void	elf_unmap_64(t_elf_map_64 *map)
+{
+	free(map->shid);
+	map->shid = NULL;
+}
+
+void	elf_unmap_32(t_elf_map_32 *map)
+{
+	free(map->shid);
+	map->shid = NULL;
 }

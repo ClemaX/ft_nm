@@ -11,6 +11,7 @@ typedef enum	e_elf_err
 	ELF_EISDIR,
 	ELF_EIRREG,
 	ELF_ENOSYMS,
+	ELF_EBADAR,
 }				t_elf_err;
 
 # define ELF_SHID_UNKNOWN '?'

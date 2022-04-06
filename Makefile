@@ -28,13 +28,17 @@ endif
 # Sources
 INCS = $(LIBINCS) $(INCDIR)
 SRCS = $(addprefix $(SRCDIR)/,\
-	main.c\
+	ar_dump.c\
+	ar_iter.c\
+	ar_map.c\
 	elf_dump.c\
 	elf_map.c\
 	elf_shid.c\
 	elf_shstr.c\
 	elf_sym.c\
 	file_map.c\
+	ft_nm.c\
+	main.c\
 )
 
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
