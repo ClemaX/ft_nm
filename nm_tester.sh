@@ -5,6 +5,8 @@ trap '[ -z "$TMP_DIR" ] || rm -rf "$TMP_DIR"' EXIT
 FT_NM="$(dirname "$0")/ft_nm"
 BIN_DIR=/bin
 
+UNAME=$(uname -s)
+
 # Create temporary directory for fake path
 export TMP_DIR=$(mktemp -d)
 
@@ -15,14 +17,14 @@ export TMP_DIR=$(mktemp -d)
 ln -s "$PWD/$FT_NM" "$TMP_DIR/nm"
 
 # Set diff colors
-[ -t 1 ] && DIFF_COLOR=always || DIFF_COLOR=never
+[ "$UNAME" != Darwin -a -t 1 ] && DIFF_FLAGS="--color=always"
 
 # Compare nm outputs and status codes
 nm_diff() # arguments
 {
 	local GREP=$(which grep)
 
-	diff "--color=$DIFF_COLOR" \
+	diff $DIFF_FLAGS \
 		<(set -o pipefail; LC_COLLATE=C \
 			nm "$1" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?") \
