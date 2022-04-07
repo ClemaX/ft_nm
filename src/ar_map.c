@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <ar.h>
 
-#include <byteswap.h>
 #include <libft.h>
 
 #include <ar_map.h>
@@ -127,7 +126,7 @@ static int	ar_map_members(t_ar_map *map, const struct ar_hdr *header,
 				else
 					ft_dprintf(2, "Could not map symbol[%lu]: header: %p, end: %p\n", i, header, end);
 			}
-		}	
+		}
 	}
 	return err;
 }
