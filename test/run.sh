@@ -13,6 +13,8 @@ CC=clang
 
 CFLAGS="-Wall -Wextra -Wno-unused-command-line-argument"
 
+UNAME=$(uname -s)
+
 # Create temporary directory for fake path
 export TMP_DIR=$(mktemp -d)
 
@@ -27,7 +29,7 @@ nm_diff() # arguments
 {
 	local GREP=$(which grep)
 
-	diff "--color=$DIFF_COLOR" \
+	diff $DIFF_FLAGS \
 		<(set -o pipefail; LC_COLLATE=C \
 			nm "$@" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?") \
@@ -42,10 +44,10 @@ then
 	COLOR_PASS='\e[32m'
 	COLOR_FAIL='\e[31m'
 	COLOR_RESET='\e[0m'
-	DIFF_COLOR=always
+	[ "$UNAME" != Darwin ] && DIFF_FLAGS="--color=always" || DIFF_FLAGS=
 else
 	COLOR_ARCH= COLOR_PASS= COLOR_FAIL= COLOR_RESET=
-	DIFF_COLOR=never
+	DIFF_FLAGS=
 fi
 
 OUTFILE="$TMP_DIR/test.o"

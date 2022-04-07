@@ -17,7 +17,7 @@ export TMP_DIR=$(mktemp -d)
 ln -s "$PWD/$FT_NM" "$TMP_DIR/nm"
 
 # Set diff colors
-[ "$UNAME" != Darwin -a -t 1 ] && DIFF_FLAGS="--color=always"
+[ "$UNAME" != Darwin -a -t 1 ] && DIFF_FLAGS="--color=always" || DIFF_FLAGS=
 
 # Compare nm outputs and status codes
 nm_diff() # arguments
