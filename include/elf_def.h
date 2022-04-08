@@ -64,4 +64,12 @@ typedef struct	s_elf_section_hint
 	char			identifier;
 }				t_elf_section_hint;
 
+typedef int8_t	t_elf_opt;
+
+# define ELF_OERROR -1
+# define ELF_OHELP	0b00000001
+# define ELF_ODEBUG 0b00000010
+
+# define ELF_OPTIONS_SHORT "ha"
+
 #endif

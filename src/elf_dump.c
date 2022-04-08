@@ -26,7 +26,8 @@ static uint8_t	elf_ident(const void *data, unsigned long size)
 // TODO: Handle no sort ('-p/--no-sort')
 // TODO: Handle reverse sort ('-r/--reverse-sort')
 
-t_elf_err		elf_dump(const void *data, unsigned long size, const char *name)
+t_elf_err		elf_dump(const void *data, unsigned long size, t_elf_opt options,
+	const char *prog)
 {
 	const uint8_t	elf_class = elf_ident(data, size);
 	t_elf_map_64	map;
@@ -54,11 +55,11 @@ t_elf_err		elf_dump(const void *data, unsigned long size, const char *name)
 			err = funs[elf_class - 1].map(&map, data, size);
 			if (err == 0)
 			{
-				err = funs[elf_class - 1].load(&symbols, &map);
+				err = funs[elf_class - 1].load(&symbols, &map, options);
 				if (err == 0)
 				{
-					if (name != NULL)
-						ft_dprintf(STDERR_FILENO, "\n%s:\n", name);
+					if (prog != NULL)
+						ft_dprintf(STDERR_FILENO, "\n%s:\n", prog);
 					ft_lstsort(&symbols, elf_sym_cmp);
 					ft_lstiter(symbols, funs[elf_class - 1].print);
 					ft_lstclear(&symbols, NULL);
@@ -68,8 +69,8 @@ t_elf_err		elf_dump(const void *data, unsigned long size, const char *name)
 		}
 		else
 		{
-			if (name != NULL)
-				ft_dprintf(STDERR_FILENO, "\n%s:\n", name);
+			if (prog != NULL)
+				ft_dprintf(STDERR_FILENO, "\n%s:\n", prog);
 			err = ELF_ENOSYMS;
 		}
 	}

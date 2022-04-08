@@ -5,13 +5,13 @@
 #include <inttypes.h>
 
 /**
- * @brief	Identify a 64 bit ELF symbol according to it's location.
+ * @brief	Identify a 32 bit symbol according to it's location and attributes.
  * 
- * @param	map		Parsed 64 bit ELF map.
- * @param	symbol	64 bit ELF symbol.
- * @return	char	Symbol identifier.
+ * @param	map		Parsed 32 bit ELF map.
+ * @param	symbol	32 bit ELF symbol.
+ * @return	char	Symbol identifier.	
  */
-static char	elf_sym_locate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
+static char	elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 {
 	char	identifier = ELF_SYMID_UNKNOWN;
 
@@ -33,18 +33,20 @@ static char	elf_sym_locate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	else if (ELF64_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC)
 		identifier = ELF_SYMID_INDIRECT;
 	else
-		identifier = map->shid[symbol->st_shndx];
+		identifier = map->shid[symbol->st_shndx];	
+	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
+		identifier += 'A' - 'a';
 	return identifier;
 }
 
 /**
- * @brief	Identify a 32 bit ELF symbol according to it's location.
+ * @brief	Identify a 64 bit symbol according to it's location and attributes.
  * 
- * @param	map		Parsed 32 bit ELF map.
- * @param	symbol	32 bit ELF symbol.
- * @return	char	Symbol identifier.
+ * @param	map		Parsed 64 bit ELF map.
+ * @param	symbol	64 bit ELF symbol.
+ * @return	char	Symbol identifier.	
  */
-static char	elf_sym_locate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
+static char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	char	identifier = ELF_SYMID_UNKNOWN;
 
@@ -66,40 +68,8 @@ static char	elf_sym_locate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 	else if ((ELF32_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC))
 		identifier = ELF_SYMID_INDIRECT;
 	else
-		identifier = map->shid[symbol->st_shndx];
-	return identifier;
-}
-
-/**
- * @brief	Identify a 64 bit symbol according to it's location and attributes.
- * 
- * @param	map		Parsed 64 bit ELF map.
- * @param	symbol	64 bit ELF symbol.
- * @return	char	Symbol identifier.	
- */
-char		elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
-{
-	char	identifier;
-
-	identifier = elf_sym_locate_64(map, symbol);
+		identifier = map->shid[symbol->st_shndx];	
 	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
-		identifier += 'A' - 'a';
-	return identifier;
-}
-
-/**
- * @brief	Identify a 32 bit symbol according to it's location and attributes.
- * 
- * @param	map		Parsed 32 bit ELF map.
- * @param	symbol	32 bit ELF symbol.
- * @return	char	Symbol identifier.	
- */
-char		elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
-{
-	char	identifier;
-
-	identifier = elf_sym_locate_32(map, symbol);
-	if (ft_islower(identifier) && ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
 	return identifier;
 }
@@ -205,9 +175,11 @@ t_list		*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
  * 
  * @param	dest		Destination pointer for the head of the linked list.
  * @param	map			Parsed 64 bit ELF map.
+ * @param	t_elf_opt	ELF symbol filters.	
  * @return	t_elf_err	Zero or error code.
  */
-t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
+t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map,
+	t_elf_opt options)
 {
 	t_list			*elem;
 	Elf64_Half		i;
@@ -219,17 +191,18 @@ t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
 	while (err == ELF_EOK && i < map->sym_count)
 	{
 		err = elf_sym_validate_64(map, map->sym + i);
-		if (err == ELF_EOK
-		&& *(map->str + map->sym[i].st_name) != '\0'
-		&& ELF64_ST_TYPE(map->sym[i].st_info) != STT_FILE)
+		if (err == ELF_EOK && *(map->str + map->sym[i].st_name) != '\0')
 		{
-			elem = elf_load_sym_64(map, map->sym + i);
-			if (elem != NULL)
-				ft_lstadd_front(dest, elem);
-			else
+			if (options & ELF_ODEBUG || ELF64_ST_TYPE(map->sym[i].st_info) != STT_FILE)
 			{
-				ft_lstclear(dest, NULL);
-				err = ELF_ESYS;
+				elem = elf_load_sym_64(map, map->sym + i);
+				if (elem != NULL)
+					ft_lstadd_front(dest, elem);
+				else
+				{
+					ft_lstclear(dest, NULL);
+					err = ELF_ESYS;
+				}
 			}
 		}
 		i++;
@@ -246,7 +219,8 @@ t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map)
  * @param	map			Parsed 32 bit ELF map.
  * @return	t_elf_err	Zero or error code.
  */
-t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map)
+t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map,
+	t_elf_opt options)
 {
 	t_list			*elem;
 	Elf32_Half		i;
@@ -258,17 +232,18 @@ t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map)
 	while (err == ELF_EOK && i < map->sym_count)
 	{
 		err = elf_sym_validate_32(map, map->sym + i);
-		if (err == ELF_EOK
-		&& *(map->str + map->sym[i].st_name) != '\0'
-		&& ELF32_ST_TYPE(map->sym[i].st_info) != STT_FILE)
+		if (err == ELF_EOK && *(map->str + map->sym[i].st_name) != '\0')
 		{
-			elem = elf_load_sym_32(map, map->sym + i);
-			if (elem != NULL)
-				ft_lstadd_front(dest, elem);
-			else
+			if (options & ELF_ODEBUG || ELF32_ST_TYPE(map->sym->st_info) != STT_FILE)
 			{
-				ft_lstclear(dest, NULL);
-				err = ELF_ESYS;
+				elem = elf_load_sym_32(map, map->sym + i);
+				if (elem != NULL)
+					ft_lstadd_front(dest, elem);
+				else
+				{
+					ft_lstclear(dest, NULL);
+					err = ELF_ESYS;
+				}
 			}
 		}
 		i++;

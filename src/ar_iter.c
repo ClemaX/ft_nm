@@ -16,7 +16,8 @@ static unsigned	ar_name_len(const char *name)
 	return i;
 }
 
-void		ar_iter(const t_ar_map *map, ar_iter_fun fun, void *fun_data)
+void		ar_iter(const t_ar_map *map, ar_iter_fun fun, t_elf_opt options,
+	const char *prog)
 {
 	unsigned long	i;
 
@@ -24,7 +25,7 @@ void		ar_iter(const t_ar_map *map, ar_iter_fun fun, void *fun_data)
 	while (i < map->count)
 	{
 		fun(map->members[i].name, ar_name_len(map->members[i].name),
-			map->members[i].data, map->members[i].size, fun_data);
+			map->members[i].data, map->members[i].size, options, prog);
 		i++;
 	}
 }

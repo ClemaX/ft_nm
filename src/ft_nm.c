@@ -12,31 +12,25 @@
 
 int	ft_nm_perror(const char *prog, const char *file, t_elf_err err)
 {
+	const char	*messages[6] = {
+		[ELF_EOK]=NULL,
+		[ELF_EBADFMT]="%s: %s: file format not recognized\n",
+		[ELF_EISDIR]="%s: Warning: '%s' is a directory\n",
+		[ELF_EBADAR]="%s: %s: malformed archive\n",
+		[ELF_ENOSYMS]="%s: %s: no symbols\n",
+	};
 	int ret;
 
 	ret = 0;
-	if (err != ELF_EOK)
+	if (err != ELF_EOK && err != ELF_ESYS)
 	{
-		if (err == ELF_ENOSYMS)
-			ft_dprintf(STDERR_FILENO, "%s: %s: no symbols\n", prog, file);
-		else
-		{
-			if (err == ELF_EBADFMT)
-				ft_dprintf(STDERR_FILENO,
-					"%s: %s: file format not recognized\n", prog, file);
-			else if (err == ELF_EISDIR)
-				ft_dprintf(STDERR_FILENO,
-					"%s: Warning: '%s' is a directory\n", prog, file);
-			else if (err == ELF_EBADAR)
-				ft_dprintf(STDERR_FILENO,
-					"%s: %s: malformed archive\n", prog, file);
-			ret = 1;
-		}
+		ft_dprintf(STDERR_FILENO, messages[err], prog, file);
+		ret = err != ELF_ENOSYMS;
 	}
 	return ret;
 }
 
-int	ft_nm(const char *prog, const char *filename)
+int			ft_nm(const char *filename, t_elf_opt options, const char *prog)
 {
 	void		*data;
 	off_t		size;
@@ -58,9 +52,9 @@ int	ft_nm(const char *prog, const char *filename)
 		else
 		{
 			if (ar_ident(data, (unsigned long)size))
-				err = ar_dump(prog, data, (unsigned long)size) * ELF_EBADAR;
+				err = ar_dump(data, (unsigned long)size, options, prog) * ELF_EBADAR;
 			else
-				err = elf_dump(data, (unsigned long)size, NULL);
+				err = elf_dump(data, (unsigned long)size, options, NULL);
 			if (file_unmap(&data, size))
 				err = ELF_ESYS;
 		}
