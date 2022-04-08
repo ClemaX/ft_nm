@@ -12,6 +12,11 @@ static const char	*option_names[] = {
 	"debug-syms",
 };
 
+static const char	*option_descriptions[] = {
+	"Display this information",
+	"Display debugger-only symbols",
+};
+
 static t_elf_opt	get_long_option(const char *name)
 {
 	t_elf_opt			option;
@@ -96,10 +101,11 @@ The options are:\n\
 	while (i < sizeof(ELF_OPTIONS_SHORT) - 1)
 	{
 		if (option_names[i] == NULL)
-			fmt =  " -%c%-22.0s %s\n";
+			fmt =  " -%c%-22.0s%s\n";
 		else
-			fmt = " -%c, --%-18s %s\n";
-		ft_dprintf(2, fmt, ELF_OPTIONS_SHORT[i], option_names[i], "");
+			fmt = " -%c, --%-18s%s\n";
+		ft_dprintf(2, fmt, ELF_OPTIONS_SHORT[i], option_names[i],
+			option_descriptions[i]);
 		i++;
 	}
 }
@@ -119,7 +125,7 @@ int	main(int ac, const char *const *const av)
 	err = 0;
 	if (ac == 1)
 		ac++;
-	options = get_options(&i, av);	
+	options = get_options(&i, av);
 	ret = options == ELF_OERROR;
 	if (ret == 0 && (options & ELF_OHELP) == 0)
 	{
