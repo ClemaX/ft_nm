@@ -7,10 +7,10 @@
 /**
  * @brief	Map special ELF sections and check for duplicates.
  * 
- * @param	dest	The destination for the section's data pointer.
- * @param	data	The section's data pointer.
- * @param	name	The section's name, for error messages.
- * @return	int		Zero or error code.
+ * @param	dest		The destination for the section's data pointer.
+ * @param	data		The section's data pointer.
+ * @param	name		The section's name, for error messages.
+ * @return	t_elf_err	Zero or error code.
  */
 static int	elf_map_section(const void **dest, const void *data, const char *name)
 {
@@ -32,108 +32,121 @@ static int	elf_map_section(const void **dest, const void *data, const char *name
 /**
  * @brief	Map 64 bit ELF sections names and identifiers from object data.
  * 
- * @param	map		Destination for mapped data.
- * @param	data	64 bit ELF object data.
- * @return	int		Zero or error code.
+ * @param	map			Destination for mapped data.
+ * @param	data		64 bit ELF object data.
+ * @return	t_elf_err	Zero or error code.
  */
 static int	elf_map_sections_64(t_elf_map_64 *map, const void *data)
 {
-	int		i;
-	int		ret;
+	const char	*name;
+	int			i;
+	int			err;
 
-	ret = 0;
+	err = 0;
 	if (map->eh->e_shnum != 0)
 	{
 		map->shid = malloc(sizeof(*map->shid) * map->eh->e_shnum);
 		if (map->shid != NULL)
 		{
 			i = 0;
-			while (ret == 0 && i < map->eh->e_shnum)
+			while (err == 0 && i < map->eh->e_shnum)
 			{
-				map->shid[i] = elf_map_shid(map->shstr + map->sh[i].sh_name,
-					map->sh[i].sh_type, map->sh[i].sh_flags);
-				if (map->shid[i] == ELF_SHID_STRTAB)
-					ret = elf_map_section((const void**)&map->str, data + map->sh[i].sh_offset,
-						map->shstr + map->sh[i].sh_name);
-				else if (map->shid[i] == ELF_SHID_SYMTAB)
+				name = elf_shstr(map, map->sh[i].sh_name);
+				err = name == NULL;
+				if (err == 0)
 				{
-					ret = elf_map_section((const void**)&map->sym, data + map->sh[i].sh_offset,
-						map->shstr + map->sh[i].sh_name);
-					if (ret == 0)
+					map->shid[i] = elf_map_shid(name,map->sh[i].sh_type,
+						map->sh[i].sh_flags);
+					if (map->shid[i] == ELF_SHID_STRTAB)
+					{
+						map->strndx = i;
+						err = elf_map_section((const void**)&map->str,
+							data + map->sh[i].sh_offset, name);
+					}
+					else if (map->shid[i] == ELF_SHID_SYMTAB)
+					{
 						map->sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
+						err = elf_map_section((const void**)&map->sym,
+							data + map->sh[i].sh_offset, name);
+					}
+					i++;
 				}
-				i++;
 			}
 		}
 		else
-		{
-			ret = -1;
-			ft_dprintf(2, "symid[%u]: allocation failed\n", map->eh->e_shnum);
-		}
+			err = -1;
 	}
 	else
 		map->shid = NULL;
-	return ret;
+	return err;
 }
 
 /**
  * @brief	Map 32 bit ELF sections names and identifiers from object data.
  * 
- * @param	map		Destination for mapped data.
- * @param	data	32 bit ELF object data.
- * @return	int		Zero or error code.
+ * @param	map			Destination for mapped data.
+ * @param	data		32 bit ELF object data.
+ * @return	t_elf_err	Zero or error code.
  */
 static int	elf_map_sections_32(t_elf_map_32 *map, const void *data)
 {
-	int		i;
-	int		ret;
+	const char	*name;
+	int			i;
+	t_elf_err	err;
 
-	ret = 0;
+	err = 0;
 	if (map->eh->e_shnum != 0)
 	{
 		map->shid = malloc(sizeof(*map->shid) * map->eh->e_shnum);
 		if (map->shid != NULL)
 		{
 			i = 0;
-			while (ret == 0 && i < map->eh->e_shnum)
+			while (err == 0 && i < map->eh->e_shnum)
 			{
-				map->shid[i] = elf_map_shid(map->shstr + map->sh[i].sh_name,
-					map->sh[i].sh_type, map->sh[i].sh_flags);
-				if (map->shid[i] == ELF_SHID_STRTAB)
-					ret = elf_map_section((const void**)&map->str, data + map->sh[i].sh_offset,
-						map->shstr + map->sh[i].sh_name);
-				else if (map->shid[i] == ELF_SHID_SYMTAB)
+				name = elf_shstr(map, map->sh[i].sh_name);
+				err = name == NULL;
+				if (err == 0)
 				{
-					ret = elf_map_section((const void**)&map->sym, data + map->sh[i].sh_offset,
-						map->shstr + map->sh[i].sh_name);
-					if (ret == 0)
+					map->shid[i] = elf_map_shid(name, map->sh[i].sh_type,
+						map->sh[i].sh_flags);
+					if (map->shid[i] == ELF_SHID_STRTAB)
+					{
+						map->strndx = i;
+						err = elf_map_section((const void**)&map->str,
+							data + map->sh[i].sh_offset, name);
+					}
+					else if (map->shid[i] == ELF_SHID_SYMTAB)
+					{
 						map->sym_count = map->sh[i].sh_size / map->sh[i].sh_entsize;
+						err = elf_map_section((const void**)&map->sym,
+							data + map->sh[i].sh_offset, name);
+					}
+					i++;
 				}
-				i++;
 			}
 		}
 		else
 		{
-			ret = -1;
+			err = -1;
 			ft_dprintf(2, "symid[%u]: allocation failed\n", map->eh->e_shnum);
 		}
 	}
 	else
 		map->shid = NULL;
-	return ret;
+	return err;
 }
 
 /**
  * @brief	Map a 64 bit ELF object's headers and sections.
  * 
- * @param	map		Destination for mapped data.
- * @param	data	64 bit ELF object data.
- * @param	size	ELF object data size.
- * @return	int		Zero or error code.
+ * @param	map			Destination for mapped data.
+ * @param	data		64 bit ELF object data.
+ * @param	size		ELF object data size.
+ * @return	t_elf_err	Zero or error code.
  */
-int		elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
+t_elf_err	elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 {
-	int ret;
+	t_elf_err err;
 
 	map->eh = (Elf64_Ehdr*)data;
 
@@ -142,7 +155,7 @@ int		elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 	|| size < map->eh->e_shoff + map->eh->e_shentsize * map->eh->e_shnum)
 	{
 		ft_dprintf(STDERR_FILENO, "Invalid ELF header!\n");
-		ret = ELF_EBADFMT;
+		err = ELF_EBADFMT;
 	}
 	else
 	{
@@ -156,22 +169,22 @@ int		elf_map_64(t_elf_map_64 *map, const void *data, unsigned long size)
 		map->sym = NULL;
 		map->sym_count = 0;
 
-		ret = elf_map_sections_64(map, data);
+		err = elf_map_sections_64(map, data);
 	}
-	return (ret);
+	return (err);
 }
 
 /**
  * @brief	Map a 32 bit ELF object's headers and sections.
  * 
- * @param	map		Destination for mapped data.
- * @param	data	32 bit ELF object data.
- * @param	size	ELF object data size.
- * @return	int		Zero or error code.
+ * @param	map			Destination for mapped data.
+ * @param	data		32 bit ELF object data.
+ * @param	size		ELF object data size.
+ * @return	t_elf_err	Zero or error code.
  */
-int		elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
+t_elf_err	elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
 {
-	int ret;
+	t_elf_err err;
 
 	map->eh = (Elf32_Ehdr*)data;
 
@@ -180,7 +193,7 @@ int		elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
 	|| size < map->eh->e_shoff + map->eh->e_shentsize * map->eh->e_shnum)
 	{
 		ft_dprintf(STDERR_FILENO, "Invalid ELF header!\n");
-		ret = ELF_EBADFMT;
+		err = ELF_EBADFMT;
 	}
 	else
 	{
@@ -194,9 +207,9 @@ int		elf_map_32(t_elf_map_32 *map, const void *data, unsigned long size)
 		map->sym = NULL;
 		map->sym_count = 0;
 
-		ret = elf_map_sections_32(map, data);
+		err = elf_map_sections_32(map, data);
 	}
-	return (ret);
+	return (err);
 }
 
 void	elf_unmap_64(t_elf_map_64 *map)

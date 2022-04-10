@@ -39,7 +39,6 @@ int			ft_nm(const char *filename, t_elf_opt options, const char *prog)
 
 	if (filename == NULL)
 		filename = FT_NM_DEFAULT;
-	
 	if ((fd = open(filename, O_RDONLY)) != -1)
 	{
 		size = file_map(fd, &data);

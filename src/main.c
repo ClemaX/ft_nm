@@ -7,14 +7,25 @@
 
 #include <ft_nm.h>
 
-static const char	*option_names[] = {
-	"help",
-	"debug-syms",
-};
-
-static const char	*option_descriptions[] = {
+static const char	*option_descriptions[] =
+{
 	"Display this information",
 	"Display debugger-only symbols",
+	"Display only external symbols",
+};
+
+static const char	*option_names[] =
+{
+	"help",
+	"debug-syms",
+	"extern-only"
+};
+
+static const char	option_short_names[] =
+{
+	'h',
+	'a',
+	'g',
 };
 
 static t_elf_opt	get_long_option(const char *name)
@@ -34,7 +45,7 @@ static t_elf_opt	get_long_option(const char *name)
 
 static t_elf_opt	get_short_option(char c)
 {
-	const int	i = ft_strpos(ELF_OPTIONS_SHORT, c);
+	const int	i = ft_strpos(option_short_names, c);
 	t_elf_opt	option;
 
 	if (i != -1)
@@ -98,13 +109,13 @@ The options are:\n\
 ", prog
 	);
 	i = 0;
-	while (i < sizeof(ELF_OPTIONS_SHORT) - 1)
+	while (i < sizeof(option_short_names))
 	{
 		if (option_names[i] == NULL)
 			fmt =  " -%c%-22.0s%s\n";
 		else
 			fmt = " -%c, --%-18s%s\n";
-		ft_dprintf(2, fmt, ELF_OPTIONS_SHORT[i], option_names[i],
+		ft_dprintf(2, fmt, option_short_names[i], option_names[i],
 			option_descriptions[i]);
 		i++;
 	}
@@ -113,7 +124,7 @@ The options are:\n\
 // TODO: Use 'a.out' as default objfile argument
 // TODO: Handle big-endian encoding
 // TODO: Handle 32-bit files (using unions?)
-int	main(int ac, const char *const *const av)
+int			main(int ac, const char *const *const av)
 {
 	int			i;
 	int			ret;

@@ -8,7 +8,11 @@
 // Unknown symbol
 # define ELF_SYMID_UNKNOWN ELF_SHID_UNKNOWN
 // Undefined symbol
-# define ELF_SYMID_UNDEFINED ELF_SHID_UNDEFINED
+# define ELF_SYMID_UNDEFINED 'U'
+// Absolute symbol
+# define ELF_SYMID_ABS 'a'
+// Common symbol
+# define ELF_SYMID_COMMON 'c'
 // Unique global symbol
 # define ELF_SYMID_UNIQUE 'u'
 // Weakly bound object symbol
@@ -26,19 +30,29 @@ typedef struct	s_elf_sym
 	char			identifier;
 }				t_elf_sym;
 
+# define elf_sym_filter(map, symbol, options)\
+	((options & ELF_OEXTERN) == 0\
+		|| (ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL\
+			|| ELF32_ST_BIND(symbol.st_info) == STB_WEAK))\
+	&& ((options & ELF_ODEBUG\
+		&& (*(map->str + symbol.st_name) != '\0'\
+			|| ELF32_ST_TYPE(symbol.st_info) == STT_FILE))\
+		|| (*(map->str + symbol.st_name) != '\0'\
+			&& ELF32_ST_TYPE(symbol.st_info) != STT_FILE))
+
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol);
 
-t_list	*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
-t_list	*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol);
+t_list	*elf_sym_load_64(const t_elf_map_64 *map, const Elf64_Sym *symbol);
+t_list	*elf_sym_load_32(const t_elf_map_32 *map, const Elf32_Sym *symbol);
 
-int		elf_load_syms_64(t_list **dest, const t_elf_map_64 *map,
+int		elf_syms_load_64(t_list **dest, const t_elf_map_64 *map,
 	t_elf_opt options);
-int		elf_load_syms_32(t_list **dest, const t_elf_map_32 *map,
+int		elf_syms_load_32(t_list **dest, const t_elf_map_32 *map,
 	t_elf_opt options);
 
 int		elf_sym_cmp(void *a, void *b);
 
-void	elf_print_sym_64(void *data);
-void	elf_print_sym_32(void *data);
+void	elf_sym_print_64(const Elf64_Sym *data);
+void	elf_sym_print_32(const Elf32_Sym *data);
 
 #endif

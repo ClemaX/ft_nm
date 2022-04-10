@@ -34,7 +34,6 @@ SRCS = $(addprefix $(SRCDIR)/,\
 	elf_dump.c\
 	elf_map.c\
 	elf_shid.c\
-	elf_shstr.c\
 	elf_sym.c\
 	file_map.c\
 	ft_nm.c\

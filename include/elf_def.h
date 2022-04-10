@@ -17,15 +17,12 @@ typedef enum	e_elf_err
 # define ELF_SHID_UNKNOWN '?'
 # define ELF_SHID_STRTAB 1
 # define ELF_SHID_SYMTAB 2
-# define ELF_SHID_ABS 'a'
-# define ELF_SHID_COMMON 'c'
+# define ELF_SHID_STAB '-'
 # define ELF_SHID_BSS 'b'
+# define ELF_SHID_TEXT 't'
+# define ELF_SHID_SDATA 's'
 # define ELF_SHID_DATA 'd'
 # define ELF_SHID_READONLY 'r'
-# define ELF_SHID_SDATA 's'
-# define ELF_SHID_TEXT 't'
-# define ELF_SHID_UNDEFINED 'U'
-# define ELF_SHID_STAB '-'
 
 typedef struct	s_elf_map_64
 {
@@ -36,6 +33,7 @@ typedef struct	s_elf_map_64
 	const char			*str;
 	const char			*shstr;
 	const Elf64_Sym		*sym;
+	Elf64_Half			strndx;
 	Elf64_Xword			sym_count;
 }				t_elf_map_64;
 
@@ -48,6 +46,7 @@ typedef struct	s_elf_map_32
 	const char			*str;
 	const char			*shstr;
 	const Elf32_Sym		*sym;
+	Elf32_Half			strndx;
 	Elf32_Xword			sym_count;
 }				t_elf_map_32;
 
@@ -66,10 +65,9 @@ typedef struct	s_elf_section_hint
 
 typedef int8_t	t_elf_opt;
 
-# define ELF_OERROR -1
-# define ELF_OHELP	0b00000001
-# define ELF_ODEBUG 0b00000010
-
-# define ELF_OPTIONS_SHORT "ha"
+# define ELF_OERROR 	-1
+# define ELF_OHELP		0b00000001
+# define ELF_ODEBUG 	0b00000010
+# define ELF_OEXTERN	0b00000100
 
 #endif

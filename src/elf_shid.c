@@ -43,8 +43,8 @@ char	    elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags)
 		{0,				SHF_ALLOC | SHF_WRITE,						NULL,		ELF_SHID_DATA},
 		{0,				SHF_ALLOC,									NULL,		ELF_SHID_READONLY},
 	};
-	unsigned char	i;
-	char			identifier;
+	unsigned char					i;
+	char							identifier;
 
 	i = 0;
 	while (i != sizeof(hints) / sizeof(*hints)

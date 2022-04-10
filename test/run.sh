@@ -30,10 +30,10 @@ nm_diff() # arguments
 	local GREP=$(which grep)
 
 	diff $DIFF_FLAGS \
-		<(set -o pipefail; LC_COLLATE=C \
+		<(set -o pipefail; PATH="$TMP_DIR"; LC_COLLATE=C \
 			nm "$@" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?") \
-		<(set -o pipefail; PATH="$TMP_DIR"; LC_COLLATE=C \
+		<(set -o pipefail; LC_COLLATE=C \
 			nm "$@" 2>&1 | "$GREP" -v "bfd plugin" \
 			|| echo "status: $?")
 }
@@ -85,8 +85,15 @@ do
 		$CLEANUP >/dev/null
 	done
 done
-printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "99-no_arguments"
+printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "97-no_arguments"
 
 DIFF=$(nm_diff) \
+	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
+	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
+
+
+printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "98-debug_syms"
+
+DIFF=$(nm_diff --debug-syms "$FT_NM") \
 	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
 	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"

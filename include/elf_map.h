@@ -3,6 +3,32 @@
 
 #include <elf_def.h>
 
+/**
+ * @brief	Get a pointer to a section header string, given it's offset.
+ * 
+ * @param	map			Parsed ELF map.
+ * @param	str_offset	String offset.
+ * @return	const char*	Pointer to the string, or NULL if out of bounds.
+ */
+# define    elf_shstr(map, str_offset)\
+    (map->shstr && str_offset < map->sh[map->eh->e_shstrndx].sh_size\
+        ? map->shstr + str_offset\
+        : NULL)
+
+/**
+ * @brief	Get a pointer to a symbol string, given it's offset.
+ * 
+ * @param	map			Parsed ELF map.
+ * @param	str_offset	String offset.
+ * @return	const char*	Pointer to the string, or NULL if out of bounds.
+ */
+/* # define    elf_str(map, str_offset)\
+    (map->str && str_offset < map->sh[map->strndx].sh_size\
+        ? map->str + str_offset\
+        : NULL)
+
+ */
+
 char		elf_map_shid(const char *name, unsigned int type, Elf64_Xword flags);
 
 const char	*elf_shstr_64(const t_elf_map_64 *map, Elf64_Xword str_offset);

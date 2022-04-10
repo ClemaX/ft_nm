@@ -31,18 +31,21 @@ t_elf_err		elf_dump(const void *data, unsigned long size, t_elf_opt options,
 {
 	const uint8_t	elf_class = elf_ident(data, size);
 	t_elf_map_64	map;
-	t_elf_funs		funs[2] = (t_elf_funs[]){
+	t_elf_funs		funs[2] = (t_elf_funs[])
+	{
+		[ELFCLASS32 - 1] =
 		{
 			(t_elf_map_fun*)elf_map_32,
 			(t_elf_unmap_fun*)elf_unmap_32,
-			(t_elf_load_fun*)elf_load_syms_32,
-			(t_elf_print_fun*)elf_print_sym_32
+			(t_elf_load_fun*)elf_syms_load_32,
+			(t_elf_print_fun*)elf_sym_print_32
 		},
+		[ELFCLASS64 - 1] =
 		{
 			(t_elf_map_fun*)elf_map_64,
 			(t_elf_unmap_fun*)elf_unmap_64,
-			(t_elf_load_fun*)elf_load_syms_64,
-			(t_elf_print_fun*)elf_print_sym_64
+			(t_elf_load_fun*)elf_syms_load_64,
+			(t_elf_print_fun*)elf_sym_print_64
 		},
 	};
 	t_list			*symbols;

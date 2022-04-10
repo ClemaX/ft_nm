@@ -16,9 +16,9 @@ static char	elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 	char	identifier = ELF_SYMID_UNKNOWN;
 
 	if (symbol->st_shndx == SHN_ABS)
-		identifier = ELF_SHID_ABS;
+		identifier = ELF_SYMID_ABS;
 	else if (symbol->st_shndx == SHN_COMMON)
-		identifier = ELF_SHID_COMMON;
+		identifier = ELF_SYMID_COMMON;
 	else if (ELF64_ST_BIND(symbol->st_info) == STB_WEAK)
 	{
 		if (ELF64_ST_TYPE(symbol->st_info) == STT_OBJECT)
@@ -29,10 +29,10 @@ static char	elf_sym_type_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 			identifier += 'A' - 'a';
 	}
 	else if (symbol->st_shndx == SHN_UNDEF)
-		identifier = ELF_SHID_UNDEFINED;
+		identifier = ELF_SYMID_UNDEFINED;
 	else if (ELF64_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC)
 		identifier = ELF_SYMID_INDIRECT;
-	else
+	else if (symbol->st_shndx < map->eh->e_shnum)
 		identifier = map->shid[symbol->st_shndx];	
 	if (ft_islower(identifier) && ELF64_ST_BIND(symbol->st_info) == STB_GLOBAL)
 		identifier += 'A' - 'a';
@@ -51,9 +51,9 @@ static char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 	char	identifier = ELF_SYMID_UNKNOWN;
 
 	if (symbol->st_shndx == SHN_ABS)
-		identifier = ELF_SHID_ABS;
+		identifier = ELF_SYMID_ABS;
 	else if (symbol->st_shndx == SHN_COMMON)
-		identifier = ELF_SHID_COMMON;
+		identifier = ELF_SYMID_COMMON;
 	else if (ELF32_ST_BIND(symbol->st_info) == STB_WEAK)
 	{
 		if (ELF32_ST_TYPE(symbol->st_info) == STT_OBJECT)
@@ -64,7 +64,7 @@ static char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 			identifier += 'A' - 'a';
 	}
 	else if (symbol->st_shndx == SHN_UNDEF)
-		identifier = ELF_SHID_UNDEFINED;
+		identifier = ELF_SYMID_UNDEFINED;
 	else if ((ELF32_ST_TYPE(symbol->st_info) == STT_GNU_IFUNC))
 		identifier = ELF_SYMID_INDIRECT;
 	else
@@ -83,8 +83,10 @@ static char	elf_sym_type_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
  */
 int			elf_sym_validate_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
-	if (symbol->st_shndx > map->eh->e_shnum
-	&& !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
+	if ((symbol->st_shndx > map->eh->e_shnum
+		&& !(symbol->st_shndx > SHN_LORESERVE
+			&& symbol->st_shndx < SHN_HIRESERVE))
+	|| (symbol->st_name >= map->sh[map->strndx].sh_size))
 	{
 		ft_printf("Invalid symbol: section header index(%u) exceeds \
 e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
@@ -102,8 +104,10 @@ e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
  */
 t_elf_err	elf_sym_validate_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 {
-	if (symbol->st_shndx > map->eh->e_shnum
-	&& !(symbol->st_shndx > SHN_LORESERVE && symbol->st_shndx < SHN_HIRESERVE))
+	if ((symbol->st_shndx > map->eh->e_shnum
+		&& !(symbol->st_shndx > SHN_LORESERVE
+			&& symbol->st_shndx < SHN_HIRESERVE))
+	|| (symbol->st_name >= map->sh[map->strndx].sh_size))
 	{
 		ft_printf("Invalid symbol: section header index(%u) exceeds \
 e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
@@ -119,7 +123,7 @@ e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
  * @param	symbol	64 bit ELF symbol.
  * @return	t_list*	Allocated list node or NULL in case of error.
  */
-t_list		*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
+t_list		*elf_sym_load_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 {
 	t_list		*list_elem;
 	t_elf_sym	*new_sym;
@@ -130,8 +134,8 @@ t_list		*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
 		new_sym->symbol = symbol;
 		new_sym->name = map->str + symbol->st_name;
 		new_sym->identifier = elf_sym_type_64(map, symbol);
-		if (new_sym->identifier != ELF_SHID_COMMON
-		&& new_sym->identifier != ELF_SHID_COMMON + ('A' - 'a'))
+		if (new_sym->identifier != ELF_SYMID_COMMON
+		&& new_sym->identifier != ELF_SYMID_COMMON + ('A' - 'a'))
 			new_sym->value = symbol->st_value;
 		else
 			new_sym->value = symbol->st_size;
@@ -148,7 +152,7 @@ t_list		*elf_load_sym_64(const t_elf_map_64 *map, const Elf64_Sym *symbol)
  * @param	symbol	32 bit ELF symbol.
  * @return	t_list*	Allocated list node or NULL in case of error.
  */
-t_list		*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
+t_list		*elf_sym_load_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 {
 	t_list		*list_elem;
 	t_elf_sym	*new_sym;
@@ -159,8 +163,8 @@ t_list		*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 		new_sym->symbol = symbol;
 		new_sym->name = map->str + symbol->st_name;
 		new_sym->identifier = elf_sym_type_32(map, symbol);
-		if (new_sym->identifier != ELF_SHID_COMMON
-		&& new_sym->identifier != ELF_SHID_COMMON + ('A' - 'a'))
+		if (new_sym->identifier != ELF_SYMID_COMMON
+		&& new_sym->identifier != ELF_SYMID_COMMON + ('A' - 'a'))
 			new_sym->value = symbol->st_value;
 		else
 			new_sym->value = symbol->st_size;
@@ -175,10 +179,10 @@ t_list		*elf_load_sym_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
  * 
  * @param	dest		Destination pointer for the head of the linked list.
  * @param	map			Parsed 64 bit ELF map.
- * @param	t_elf_opt	ELF symbol filters.	
+ * @param	options		ELF symbol filters.	
  * @return	t_elf_err	Zero or error code.
  */
-t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map,
+t_elf_err	elf_syms_load_64(t_list	**dest, const t_elf_map_64 *map,
 	t_elf_opt options)
 {
 	t_list			*elem;
@@ -191,11 +195,11 @@ t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map,
 	while (err == ELF_EOK && i < map->sym_count)
 	{
 		err = elf_sym_validate_64(map, map->sym + i);
-		if (err == ELF_EOK && *(map->str + map->sym[i].st_name) != '\0')
+		if (err == ELF_EOK)
 		{
-			if (options & ELF_ODEBUG || ELF64_ST_TYPE(map->sym[i].st_info) != STT_FILE)
+			if (elf_sym_filter(map, map->sym[i], options))
 			{
-				elem = elf_load_sym_64(map, map->sym + i);
+				elem = elf_sym_load_64(map, map->sym + i);
 				if (elem != NULL)
 					ft_lstadd_front(dest, elem);
 				else
@@ -217,9 +221,10 @@ t_elf_err	elf_load_syms_64(t_list	**dest, const t_elf_map_64 *map,
  * 
  * @param	dest		Destination pointer for the head of the linked list.
  * @param	map			Parsed 32 bit ELF map.
+ * @param	options		ELF symbol filters.
  * @return	t_elf_err	Zero or error code.
  */
-t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map,
+t_elf_err	elf_syms_load_32(t_list	**dest, const t_elf_map_32 *map,
 	t_elf_opt options)
 {
 	t_list			*elem;
@@ -232,11 +237,11 @@ t_elf_err	elf_load_syms_32(t_list	**dest, const t_elf_map_32 *map,
 	while (err == ELF_EOK && i < map->sym_count)
 	{
 		err = elf_sym_validate_32(map, map->sym + i);
-		if (err == ELF_EOK && *(map->str + map->sym[i].st_name) != '\0')
+		if (err == ELF_EOK)
 		{
-			if (options & ELF_ODEBUG || ELF32_ST_TYPE(map->sym->st_info) != STT_FILE)
+			if (elf_sym_filter(map, map->sym[i], options))
 			{
-				elem = elf_load_sym_32(map, map->sym + i);
+				elem = elf_sym_load_32(map, map->sym + i);
 				if (elem != NULL)
 					ft_lstadd_front(dest, elem);
 				else
@@ -281,13 +286,12 @@ int			elf_sym_cmp(void *a, void *b)
  * @param	data		Pointer to the ELF symbol.
  * @param	value_width	Value field width.
  */
-static void	elf_print_sym(void *data, unsigned value_width)
+static void	elf_sym_print(const void *data, unsigned value_width)
 {
 	const t_elf_sym *const	sym = (t_elf_sym*)data;
 
 	// TODO: Filter on symbol loading
 	// TODO: Handle variable value size
-
 	if (sym->identifier == ELF_SYMID_UNDEFINED
 	|| sym->identifier == ELF_SYMID_WEAK
 	|| sym->identifier == ELF_SYMID_WEAKOBJ)
@@ -303,9 +307,9 @@ static void	elf_print_sym(void *data, unsigned value_width)
  * 
  * @param	data		Pointer to the ELF symbol.
  */
-void		elf_print_sym_64(void *data)
+void		elf_sym_print_64(const Elf64_Sym *data)
 {
-	elf_print_sym(data, sizeof(Elf64_Addr) * 2);
+	elf_sym_print(data, sizeof(data->st_value) * 2);
 }
 
 /**
@@ -313,7 +317,7 @@ void		elf_print_sym_64(void *data)
  * 
  * @param	data		Pointer to the ELF symbol.
  */
-void		elf_print_sym_32(void *data)
+void		elf_sym_print_32(const Elf32_Sym *data)
 {
-	elf_print_sym(data, sizeof(Elf32_Addr) * 2);
+	elf_sym_print(data, sizeof(data->st_value) * 2);
 }
