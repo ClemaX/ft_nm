@@ -86,7 +86,7 @@ static t_elf_opt	get_options(int *i , const char *const *const av)
 		}
 		else
 		{
-			while (option != ELF_OERROR && av[*i][j] != '\0')
+			while (options != ELF_OERROR && av[*i][j] != '\0')
 			{
 				option = get_short_option(av[*i][j]);
 				if (option != ELF_OERROR)
