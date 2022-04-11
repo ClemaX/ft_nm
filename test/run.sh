@@ -38,6 +38,19 @@ nm_diff() # arguments
 			|| echo "status: $?")
 }
 
+unit() # arch name args
+{
+	local arch="$1"; shift
+	local name="$1"; shift
+
+
+	printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "$arch" "$name"
+
+	DIFF=$(nm_diff "$@") \
+	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
+	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
+}
+
 if [ -t 1 ]
 then
 	COLOR_ARCH='\e[36m'
@@ -76,24 +89,28 @@ do
 			continue
 		fi
 
-		printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "$arch" "$(basename "$test")"
-
-		DIFF=$(nm_diff $OUTFILE) \
-		&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
-		|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
+		unit "$arch" "$(basename "$test")" "$OUTFILE"
 
 		$CLEANUP >/dev/null
 	done
+	echo
 done
-printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "97-no_arguments"
 
-DIFF=$(nm_diff) \
-	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
-	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
+FT_NM_ELFCLASS=$(od -An -t d1 -j 4 -N 1 "$FT_NM")
+case "$FT_NM_ELFCLASS" in
+	*2)	FT_NM_ARCH=elf64;;
+	*1)	FT_NM_ARCH=elf32;;
+	*)	FT_NM_ARCH=none;;
+esac
 
+unit "$FT_NM_ARCH" "90-no_arguments"
 
-printf "$COLOR_ARCH%-5s$COLOR_RESET %-23s " "none" "98-debug_syms"
+unit "$FT_NM_ARCH" "91-debug_syms" --debug-syms "$FT_NM"
 
-DIFF=$(nm_diff --debug-syms "$FT_NM") \
-	&& printf "$COLOR_PASS%s$COLOR_RESET\n" '✓' \
-	|| printf "$COLOR_FAIL%s$COLOR_RESET\n%s\n" '✗' "$DIFF"
+unit "$FT_NM_ARCH" "92-extern_only" --extern-only "$FT_NM"
+
+unit "$FT_NM_ARCH" "93-undefined_only" --undefined-only "$FT_NM"
+
+unit "$FT_NM_ARCH" "94-reverse_sort" --reverse-sort "$FT_NM"
+
+unit "$FT_NM_ARCH" "95-no_sort" --no-sort "$FT_NM"

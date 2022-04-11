@@ -63,7 +63,13 @@ t_elf_err		elf_dump(const void *data, unsigned long size, t_elf_opt options,
 				{
 					if (prog != NULL)
 						ft_dprintf(STDERR_FILENO, "\n%s:\n", prog);
-					ft_lstsort(&symbols, elf_sym_cmp);
+					if ((options & ELF_ONOSORT) == 0)
+					{
+						if ((options & ELF_OREVERSE) == 0)
+							ft_lstsort(&symbols, elf_sym_cmp);
+						else
+							ft_lstsortrev(&symbols, elf_sym_cmp);
+					}
 					ft_lstiter(symbols, funs[elf_class - 1].print);
 					ft_lstclear(&symbols, NULL);
 				}

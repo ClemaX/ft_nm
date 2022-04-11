@@ -30,15 +30,18 @@ typedef struct	s_elf_sym
 	char			identifier;
 }				t_elf_sym;
 
-# define elf_sym_filter(map, symbol, options)\
-	((options & ELF_OEXTERN) == 0\
-		|| (ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL\
-			|| ELF32_ST_BIND(symbol.st_info) == STB_WEAK))\
-	&& ((options & ELF_ODEBUG\
-		&& (*(map->str + symbol.st_name) != '\0'\
-			|| ELF32_ST_TYPE(symbol.st_info) == STT_FILE))\
-		|| (*(map->str + symbol.st_name) != '\0'\
-			&& ELF32_ST_TYPE(symbol.st_info) != STT_FILE))
+# define elf_sym_isextern(symbol)\
+	(ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL\
+		|| ELF32_ST_BIND(symbol->st_info) == STB_WEAK)
+
+# define elf_sym_isdebug(symbol)\
+	(ELF32_ST_TYPE(symbol->st_info) == STT_FILE)
+
+# define elf_sym_isnamed(map, symbol)\
+	(*(map->str + symbol->st_name) != '\0')
+
+# define elf_sym_isundef(symbol)\
+	(symbol->st_shndx == SHN_UNDEF)
 
 char	elf_sym_locate(const t_elf_map_64 *map, const Elf64_Sym *symbol);
 

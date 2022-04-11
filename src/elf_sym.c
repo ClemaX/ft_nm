@@ -116,6 +116,28 @@ e_shnum(%u)!\n", symbol->st_shndx, map->eh->e_shnum);
 	return 0;
 }
 
+static int	elf_sym_filter_64(const t_elf_map_64 *map, const Elf64_Sym *symbol, t_elf_opt options)
+{
+	int	match;
+
+	match = elf_sym_isdebug(symbol) ? (options & ELF_ODEBUG) : elf_sym_isnamed(map, symbol);
+	if (match && (options & (ELF_OEXTERN | ELF_OUNDEF)))
+		match = elf_sym_isextern(symbol)
+			&& (!(options & ELF_OUNDEF) || elf_sym_isundef(symbol));
+	return (match);
+}
+
+static int	elf_sym_filter_32(const t_elf_map_32 *map, const Elf32_Sym *symbol, t_elf_opt options)
+{
+	int	match;
+
+	match = elf_sym_isdebug(symbol) ? (options & ELF_ODEBUG) : elf_sym_isnamed(map, symbol);
+	if (match && (options & (ELF_OEXTERN | ELF_OUNDEF)))
+		match = elf_sym_isextern(symbol)
+			&& (!(options & ELF_OUNDEF) || elf_sym_isundef(symbol));
+	return (match);
+}
+
 /**
  * @brief Load and identify a 64 bit ELF symbol into a list node.
  * 
@@ -185,10 +207,12 @@ t_list		*elf_sym_load_32(const t_elf_map_32 *map, const Elf32_Sym *symbol)
 t_elf_err	elf_syms_load_64(t_list	**dest, const t_elf_map_64 *map,
 	t_elf_opt options)
 {
+	t_lstadd_fun	*add;
 	t_list			*elem;
 	Elf64_Half		i;
 	int				err;
 
+	add = (options & ELF_ONOSORT) == 0 ? ft_lstadd_front : ft_lstadd_back;
 	err = ELF_EOK;
 	*dest = NULL;
 	i = 0;
@@ -197,11 +221,11 @@ t_elf_err	elf_syms_load_64(t_list	**dest, const t_elf_map_64 *map,
 		err = elf_sym_validate_64(map, map->sym + i);
 		if (err == ELF_EOK)
 		{
-			if (elf_sym_filter(map, map->sym[i], options))
+			if (elf_sym_filter_64(map, map->sym + i, options))
 			{
 				elem = elf_sym_load_64(map, map->sym + i);
 				if (elem != NULL)
-					ft_lstadd_front(dest, elem);
+					add(dest, elem);
 				else
 				{
 					ft_lstclear(dest, NULL);
@@ -239,7 +263,7 @@ t_elf_err	elf_syms_load_32(t_list	**dest, const t_elf_map_32 *map,
 		err = elf_sym_validate_32(map, map->sym + i);
 		if (err == ELF_EOK)
 		{
-			if (elf_sym_filter(map, map->sym[i], options))
+			if (elf_sym_filter_32(map, map->sym + i, options))
 			{
 				elem = elf_sym_load_32(map, map->sym + i);
 				if (elem != NULL)

@@ -69,5 +69,8 @@ typedef int8_t	t_elf_opt;
 # define ELF_OHELP		0b00000001
 # define ELF_ODEBUG 	0b00000010
 # define ELF_OEXTERN	0b00000100
+# define ELF_OUNDEF		0b00001000
+# define ELF_OREVERSE	0b00010000
+# define ELF_ONOSORT	0b00100000
 
 #endif

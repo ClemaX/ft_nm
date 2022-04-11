@@ -12,13 +12,18 @@ static const char	*option_descriptions[] =
 	"Display this information",
 	"Display debugger-only symbols",
 	"Display only external symbols",
+	"Display only undefined (external) symbols",
+	"Reverse the order of the sort",
 };
 
 static const char	*option_names[] =
 {
 	"help",
 	"debug-syms",
-	"extern-only"
+	"extern-only",
+	"undefined-only",
+	"reverse-sort",
+	"no-sort",
 };
 
 static const char	option_short_names[] =
@@ -26,6 +31,9 @@ static const char	option_short_names[] =
 	'h',
 	'a',
 	'g',
+	'u',
+	'r',
+	'p',
 };
 
 static t_elf_opt	get_long_option(const char *name)
@@ -104,7 +112,7 @@ static void	print_usage(const char *prog)
 	ft_printf(
 "Usage: %s [OPTION]... [FILE]...\n\
 \
-List symbols in [FILE]... (a.out by default).\n\
+List symbols in [FILE]... (a.out by default).\n\n\
 The options are:\n\
 ", prog
 	);
