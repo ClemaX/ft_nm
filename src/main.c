@@ -140,8 +140,6 @@ int			main(int ac, const char *const *const av)
 	t_elf_err	err;
 
 	i = 1;
-	ret = 0;
-	err = 0;
 	if (ac == 1)
 		ac++;
 	options = get_options(&i, av);
