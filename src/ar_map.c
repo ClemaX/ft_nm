@@ -94,14 +94,14 @@ static long	ar_count_members(const struct ar_hdr *header,
 static int	ar_map_members(t_ar_map *map, const struct ar_hdr *header,
 	const void *end)
 {
-	unsigned long		size;
-	unsigned long		i;
-	const char			*name;
-	int					err;
+	long			size;
+	unsigned long	i;
+	const char		*name;
+	int				err;
 
 	map->count = ar_count_members(header, end);
 	map->members = NULL;
-	err = map->count < 0;
+	err = (long)map->count < 0;
 	if (err == 0 && map->count != 0)
 	{
 		map->members = malloc(sizeof(*map->members) * map->count);

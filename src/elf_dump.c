@@ -29,9 +29,8 @@ static uint8_t	elf_ident(const void *data, unsigned long size)
 t_elf_err		elf_dump(const void *data, unsigned long size, t_elf_opt options,
 	const char *prog)
 {
-	const uint8_t	elf_class = elf_ident(data, size);
-	t_elf_map_64	map;
-	t_elf_funs		funs[2] = (t_elf_funs[])
+	const uint8_t		elf_class = elf_ident(data, size);
+	const t_elf_funs	funs[2] =
 	{
 		[ELFCLASS32 - 1] =
 		{
@@ -48,8 +47,9 @@ t_elf_err		elf_dump(const void *data, unsigned long size, t_elf_opt options,
 			(t_elf_print_fun*)elf_sym_print_64
 		},
 	};
-	t_list			*symbols;
-	t_elf_err		err;
+	t_elf_map_64		map;
+	t_list				*symbols;
+	t_elf_err			err;
 
 	if (elf_class != ELFCLASSNONE)
 	{
