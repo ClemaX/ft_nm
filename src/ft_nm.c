@@ -16,6 +16,7 @@ int	ft_nm_perror(const char *prog, const char *file, t_elf_err err)
 		[ELF_EOK]=NULL,
 		[ELF_EBADFMT]="%s: %s: file format not recognized\n",
 		[ELF_EISDIR]="%s: Warning: '%s' is a directory\n",
+		[ELF_EIRREG]="%s: Warning: '%s' is not an ordinary file\n",
 		[ELF_EBADAR]="%s: %s: malformed archive\n",
 		[ELF_ENOSYMS]="%s: %s: no symbols\n",
 	};
