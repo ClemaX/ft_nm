@@ -14,6 +14,7 @@ static const char	*option_descriptions[] =
 	"Display only external symbols",
 	"Display only undefined (external) symbols",
 	"Reverse the order of the sort",
+	"Do not sort the symbols"
 };
 
 static const char	*option_names[] =
@@ -41,7 +42,7 @@ static t_elf_opt	get_long_option(const char *name)
 	t_elf_opt			option;
 
 	option = 0;
-	while ((unsigned)option < sizeof(option_names) / sizeof(*option_names) 
+	while ((unsigned)option < sizeof(option_names) / sizeof(*option_names)
 	&& ft_strcmp(option_names[option], name) != 0)
 		option++;
 	if (option != sizeof(option_names) / sizeof(*option_names))
